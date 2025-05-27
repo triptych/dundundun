@@ -99,6 +99,10 @@ const UI = {
             skillsTree: document.getElementById('skills-tree'),
             availableSkillPoints: document.getElementById('available-skill-points')
         };
+
+        // Debug menu screen element
+        console.log('Menu screen element found:', this.elements.menuScreen);
+        console.log('Close menu button found:', this.elements.closeMenuBtn);
     },
 
     /**
@@ -154,7 +158,15 @@ const UI = {
             this.elements.helpBtn.addEventListener('click', () => this.showHelp());
         }
         if (this.elements.closeMenuBtn) {
-            this.elements.closeMenuBtn.addEventListener('click', () => this.closeMenu());
+            console.log('Setting up close menu button listener');
+            this.elements.closeMenuBtn.addEventListener('click', (e) => {
+                console.log('Close menu button clicked', e);
+                e.preventDefault();
+                e.stopPropagation();
+                this.closeMenu();
+            });
+        } else {
+            console.warn('Close menu button not found');
         }
 
         // Touch and click optimizations
@@ -287,7 +299,9 @@ const UI = {
     toggleMenu() {
         const menuScreen = this.elements.menuScreen;
         if (menuScreen) {
+            console.log('Toggling menu, current classes:', menuScreen.className);
             menuScreen.classList.toggle('active');
+            console.log('Menu toggled, new classes:', menuScreen.className);
         }
     },
 
@@ -295,9 +309,14 @@ const UI = {
      * Close menu
      */
     closeMenu() {
+        console.log('closeMenu() called');
         const menuScreen = this.elements.menuScreen;
         if (menuScreen) {
+            console.log('Menu screen found, current classes:', menuScreen.className);
             menuScreen.classList.remove('active');
+            console.log('Menu closed, new classes:', menuScreen.className);
+        } else {
+            console.error('Menu screen not found in closeMenu()');
         }
     },
 

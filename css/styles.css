@@ -60,9 +60,12 @@ body {
 .overlay {
     background-color: rgba(0, 0, 0, 0.8);
     z-index: 1000;
-    display: flex;
     align-items: center;
     justify-content: center;
+}
+
+.overlay.active {
+    display: flex;
 }
 
 /* ============================================

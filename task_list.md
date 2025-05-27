@@ -8,10 +8,10 @@
 - [x] Create JavaScript module structure
 - [x] Implement responsive canvas/viewport system
 - [x] Set up local storage save system
-- [ ] Create basic game state management
+- [x] Create basic game state management
 
 ### 2. Grid-Based Movement System
-- [ ] Design room grid data structure
+- [x] Design room grid data structure
 - [ ] Implement room connectivity logic
 - [ ] Create player position tracking
 - [ ] Build tap-to-move functionality for mobile
@@ -250,4 +250,4 @@
 **Minimum Device Support**: 3+ years old mobile devices
 **Primary Platform**: Mobile web browsers (iOS Safari, Android Chrome)
 
-This task list provides a comprehensive roadmap for developing Pocket Dungeon according to the specifications outlined in the design document. Tasks are organized by development phase and priority, with clear delivarables and success criteria for each milestone.
+This task list provides a comprehensive roadmap for developing Pocket Dungeon according to the specifications outlined in the design document. Tasks are organized by development phase and priority, with clear deliverables and success criteria for each milestone.

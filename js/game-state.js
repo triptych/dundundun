@@ -2,6 +2,326 @@
 // Centralized state management for the entire game
 
 /**
+ * Room types for dungeon generation
+ */
+const RoomTypes = {
+    EMPTY: 'empty',
+    MONSTER: 'monster',
+    TREASURE: 'treasure',
+    BOSS: 'boss',
+    STAIRS: 'stairs',
+    START: 'start'
+};
+
+/**
+ * Room class representing a single room in the dungeon grid
+ */
+class Room {
+    constructor(x, y, type = RoomTypes.EMPTY) {
+        this.x = x;
+        this.y = y;
+        this.type = type;
+        this.isExplored = false;
+        this.isCleared = false;
+        this.hasPlayer = false;
+        this.connections = {
+            north: false,
+            south: false,
+            east: false,
+            west: false
+        };
+        this.data = {}; // Additional room-specific data (enemy, loot, etc.)
+    }
+
+    /**
+     * Check if this room connects to another room
+     * @param {string} direction - Direction to check (north, south, east, west)
+     * @returns {boolean} True if connected in that direction
+     */
+    hasConnection(direction) {
+        return this.connections[direction] || false;
+    }
+
+    /**
+     * Set connection in a direction
+     * @param {string} direction - Direction to connect
+     * @param {boolean} connected - Whether to connect or disconnect
+     */
+    setConnection(direction, connected = true) {
+        if (this.connections.hasOwnProperty(direction)) {
+            this.connections[direction] = connected;
+        }
+    }
+
+    /**
+     * Get adjacent coordinates for a direction
+     * @param {string} direction - Direction to get coordinates for
+     * @returns {Object|null} {x, y} coordinates or null if invalid direction
+     */
+    getAdjacentCoords(direction) {
+        const directions = {
+            north: { x: this.x, y: this.y - 1 },
+            south: { x: this.x, y: this.y + 1 },
+            east: { x: this.x + 1, y: this.y },
+            west: { x: this.x - 1, y: this.y }
+        };
+        return directions[direction] || null;
+    }
+
+    /**
+     * Get all adjacent coordinates that have connections
+     * @returns {Array} Array of {x, y, direction} objects
+     */
+    getConnectedAdjacent() {
+        const adjacent = [];
+        for (const [direction, connected] of Object.entries(this.connections)) {
+            if (connected) {
+                const coords = this.getAdjacentCoords(direction);
+                if (coords) {
+                    adjacent.push({ ...coords, direction });
+                }
+            }
+        }
+        return adjacent;
+    }
+}
+
+/**
+ * DungeonGrid class managing the room layout for a floor
+ */
+class DungeonGrid {
+    constructor(floor = 1, seed = Math.random()) {
+        this.floor = floor;
+        this.seed = seed;
+        this.width = 5; // Grid width (can be expanded)
+        this.height = 5; // Grid height (can be expanded)
+        this.rooms = new Map(); // Map of "x,y" -> Room
+        this.roomCount = 0;
+        this.startPosition = { x: 2, y: 2 }; // Center of 5x5 grid
+        this.stairsPosition = null;
+        this.bossPosition = null;
+    }
+
+    /**
+     * Get coordinate key for room map
+     * @param {number} x - X coordinate
+     * @param {number} y - Y coordinate
+     * @returns {string} Coordinate key
+     */
+    getCoordKey(x, y) {
+        return `${x},${y}`;
+    }
+
+    /**
+     * Check if coordinates are within grid bounds
+     * @param {number} x - X coordinate
+     * @param {number} y - Y coordinate
+     * @returns {boolean} True if within bounds
+     */
+    isValidCoordinate(x, y) {
+        return x >= 0 && x < this.width && y >= 0 && y < this.height;
+    }
+
+    /**
+     * Get room at coordinates
+     * @param {number} x - X coordinate
+     * @param {number} y - Y coordinate
+     * @returns {Room|null} Room at coordinates or null
+     */
+    getRoom(x, y) {
+        if (!this.isValidCoordinate(x, y)) return null;
+        return this.rooms.get(this.getCoordKey(x, y)) || null;
+    }
+
+    /**
+     * Set room at coordinates
+     * @param {number} x - X coordinate
+     * @param {number} y - Y coordinate
+     * @param {Room} room - Room to place
+     */
+    setRoom(x, y, room) {
+        if (!this.isValidCoordinate(x, y)) return;
+        const key = this.getCoordKey(x, y);
+        this.rooms.set(key, room);
+    }
+
+    /**
+     * Create a new room at coordinates
+     * @param {number} x - X coordinate
+     * @param {number} y - Y coordinate
+     * @param {string} type - Room type
+     * @returns {Room} Created room
+     */
+    createRoom(x, y, type = RoomTypes.EMPTY) {
+        const room = new Room(x, y, type);
+        this.setRoom(x, y, room);
+        this.roomCount++;
+        return room;
+    }
+
+    /**
+     * Connect two adjacent rooms
+     * @param {number} x1 - First room X
+     * @param {number} y1 - First room Y
+     * @param {number} x2 - Second room X
+     * @param {number} y2 - Second room Y
+     * @returns {boolean} True if connection was made
+     */
+    connectRooms(x1, y1, x2, y2) {
+        const room1 = this.getRoom(x1, y1);
+        const room2 = this.getRoom(x2, y2);
+
+        if (!room1 || !room2) return false;
+
+        // Determine direction from room1 to room2
+        const dx = x2 - x1;
+        const dy = y2 - y1;
+
+        // Only allow adjacent connections
+        if (Math.abs(dx) + Math.abs(dy) !== 1) return false;
+
+        let direction1, direction2;
+        if (dx === 1) { direction1 = 'east'; direction2 = 'west'; }
+        else if (dx === -1) { direction1 = 'west'; direction2 = 'east'; }
+        else if (dy === 1) { direction1 = 'south'; direction2 = 'north'; }
+        else if (dy === -1) { direction1 = 'north'; direction2 = 'south'; }
+
+        // Set bidirectional connection
+        room1.setConnection(direction1, true);
+        room2.setConnection(direction2, true);
+
+        return true;
+    }
+
+    /**
+     * Get all rooms that exist in the grid
+     * @returns {Array} Array of Room objects
+     */
+    getAllRooms() {
+        return Array.from(this.rooms.values());
+    }
+
+    /**
+     * Get adjacent rooms that are connected to the given coordinates
+     * @param {number} x - X coordinate
+     * @param {number} y - Y coordinate
+     * @returns {Array} Array of adjacent connected rooms
+     */
+    getAdjacentConnectedRooms(x, y) {
+        const room = this.getRoom(x, y);
+        if (!room) return [];
+
+        const adjacent = [];
+        const connectedCoords = room.getConnectedAdjacent();
+
+        for (const coords of connectedCoords) {
+            const adjacentRoom = this.getRoom(coords.x, coords.y);
+            if (adjacentRoom) {
+                adjacent.push(adjacentRoom);
+            }
+        }
+
+        return adjacent;
+    }
+
+    /**
+     * Check if player can move from one position to another
+     * @param {number} fromX - Current X position
+     * @param {number} fromY - Current Y position
+     * @param {number} toX - Target X position
+     * @param {number} toY - Target Y position
+     * @returns {boolean} True if movement is valid
+     */
+    canMoveTo(fromX, fromY, toX, toY) {
+        const fromRoom = this.getRoom(fromX, fromY);
+        const toRoom = this.getRoom(toX, toY);
+
+        if (!fromRoom || !toRoom) return false;
+
+        // Check if rooms are adjacent
+        const dx = Math.abs(toX - fromX);
+        const dy = Math.abs(toY - fromY);
+        if (dx + dy !== 1) return false;
+
+        // Check if rooms are connected
+        const direction = this.getDirection(fromX, fromY, toX, toY);
+        return fromRoom.hasConnection(direction);
+    }
+
+    /**
+     * Get direction from one coordinate to another
+     * @param {number} fromX - From X coordinate
+     * @param {number} fromY - From Y coordinate
+     * @param {number} toX - To X coordinate
+     * @param {number} toY - To Y coordinate
+     * @returns {string|null} Direction string or null
+     */
+    getDirection(fromX, fromY, toX, toY) {
+        const dx = toX - fromX;
+        const dy = toY - fromY;
+
+        if (dx === 1 && dy === 0) return 'east';
+        if (dx === -1 && dy === 0) return 'west';
+        if (dx === 0 && dy === 1) return 'south';
+        if (dx === 0 && dy === -1) return 'north';
+
+        return null;
+    }
+
+    /**
+     * Generate basic floor layout (to be expanded in dungeon generation)
+     * @param {number} roomCount - Number of rooms to generate (5-10)
+     */
+    generateBasicLayout(roomCount = 7) {
+        // Clear existing rooms
+        this.rooms.clear();
+        this.roomCount = 0;
+
+        // Create start room at center
+        const startRoom = this.createRoom(this.startPosition.x, this.startPosition.y, RoomTypes.START);
+
+        // Simple linear layout for now (to be replaced with proper generation)
+        const positions = [
+            { x: 2, y: 1 }, // North
+            { x: 3, y: 2 }, // East
+            { x: 2, y: 3 }, // South
+            { x: 1, y: 2 }, // West
+            { x: 2, y: 0 }, // Far North
+            { x: 4, y: 2 }  // Far East
+        ];
+
+        // Create rooms and connections
+        for (let i = 0; i < Math.min(roomCount - 1, positions.length); i++) {
+            const pos = positions[i];
+            let roomType = RoomTypes.EMPTY;
+
+            // Last room is stairs
+            if (i === roomCount - 2) {
+                roomType = RoomTypes.STAIRS;
+                this.stairsPosition = { x: pos.x, y: pos.y };
+            }
+            // Random room types for others
+            else if (Math.random() < 0.4) {
+                roomType = RoomTypes.MONSTER;
+            } else if (Math.random() < 0.2) {
+                roomType = RoomTypes.TREASURE;
+            }
+
+            this.createRoom(pos.x, pos.y, roomType);
+
+            // Connect to start room if adjacent
+            if (Math.abs(pos.x - this.startPosition.x) + Math.abs(pos.y - this.startPosition.y) === 1) {
+                this.connectRooms(this.startPosition.x, this.startPosition.y, pos.x, pos.y);
+            }
+        }
+
+        // Connect some additional rooms for branching paths
+        this.connectRooms(2, 1, 2, 0); // North to Far North
+        this.connectRooms(3, 2, 4, 2); // East to Far East
+    }
+}
+
+/**
  * Game state manager that handles all game data and state transitions
  */
 const GameState = {
@@ -24,8 +344,8 @@ const GameState = {
         agility: 10,
         vitality: 10,
         availablePoints: 0,
-        x: 0, // Grid position
-        y: 0, // Grid position
+        x: 2, // Grid position (start at center)
+        y: 2, // Grid position (start at center)
         floor: 1,
         equipment: {
             weapon: null,
@@ -34,14 +354,15 @@ const GameState = {
         }
     },
 
-    // Dungeon state
+    // Dungeon state with room grid system
     dungeon: {
         currentFloor: 1,
-        rooms: [],
-        playerPosition: { x: 0, y: 0 },
-        exploredRooms: [],
-        currentRoom: null,
-        theme: 'crypt' // crypt, cave, forest
+        grid: null, // DungeonGrid instance
+        playerPosition: { x: 2, y: 2 }, // Current player position
+        exploredRooms: new Set(), // Track explored room coordinates as "x,y" strings
+        currentRoom: null, // Current Room object
+        theme: 'crypt', // crypt, cave, forest
+        floorSeed: Math.random() // Seed for reproducible floor generation
     },
 
     // Inventory state
@@ -130,8 +451,8 @@ const GameState = {
             agility: 10,
             vitality: 10,
             availablePoints: 0,
-            x: 0,
-            y: 0,
+            x: 2,
+            y: 2,
             floor: 1,
             equipment: {
                 weapon: null,
@@ -140,15 +461,8 @@ const GameState = {
             }
         };
 
-        // Reset dungeon
-        this.dungeon = {
-            currentFloor: 1,
-            rooms: [],
-            playerPosition: { x: 0, y: 0 },
-            exploredRooms: [],
-            currentRoom: null,
-            theme: 'crypt'
-        };
+        // Initialize new dungeon grid
+        this.generateNewFloor(1);
 
         // Reset inventory
         this.inventory = {
@@ -187,6 +501,117 @@ const GameState = {
         if (this.settings.autoSave) {
             this.saveGameData();
         }
+    },
+
+    /**
+     * Generate a new floor with room grid
+     * @param {number} floorNumber - Floor number to generate
+     */
+    generateNewFloor(floorNumber) {
+        // Generate new seed for this floor
+        this.dungeon.floorSeed = Math.random();
+
+        // Create new dungeon grid
+        this.dungeon.grid = new DungeonGrid(floorNumber, this.dungeon.floorSeed);
+
+        // Generate basic layout (5-10 rooms)
+        const roomCount = Math.floor(Math.random() * 6) + 5; // 5-10 rooms
+        this.dungeon.grid.generateBasicLayout(roomCount);
+
+        // Update dungeon state
+        this.dungeon.currentFloor = floorNumber;
+        this.dungeon.playerPosition = { x: this.dungeon.grid.startPosition.x, y: this.dungeon.grid.startPosition.y };
+        this.dungeon.exploredRooms = new Set();
+
+        // Set current room and mark as explored
+        this.updateCurrentRoom(this.dungeon.playerPosition.x, this.dungeon.playerPosition.y);
+
+        // Update theme every 5 floors
+        const themes = ['crypt', 'cave', 'forest'];
+        this.dungeon.theme = themes[Math.floor((floorNumber - 1) / 5) % themes.length];
+
+        console.log(`Generated floor ${floorNumber} with ${roomCount} rooms`);
+    },
+
+    /**
+     * Update current room and exploration state
+     * @param {number} x - X coordinate
+     * @param {number} y - Y coordinate
+     */
+    updateCurrentRoom(x, y) {
+        if (!this.dungeon.grid) return;
+
+        const room = this.dungeon.grid.getRoom(x, y);
+        if (!room) return;
+
+        // Mark previous room as not having player
+        if (this.dungeon.currentRoom) {
+            this.dungeon.currentRoom.hasPlayer = false;
+        }
+
+        // Update current room
+        this.dungeon.currentRoom = room;
+        room.hasPlayer = true;
+        room.isExplored = true;
+
+        // Add to explored rooms set
+        this.dungeon.exploredRooms.add(this.dungeon.grid.getCoordKey(x, y));
+
+        // Update player position
+        this.dungeon.playerPosition = { x, y };
+        this.player.x = x;
+        this.player.y = y;
+    },
+
+    /**
+     * Move player to new position if valid
+     * @param {number} toX - Target X coordinate
+     * @param {number} toY - Target Y coordinate
+     * @returns {boolean} True if move was successful
+     */
+    movePlayer(toX, toY) {
+        if (!this.dungeon.grid) return false;
+
+        const fromX = this.dungeon.playerPosition.x;
+        const fromY = this.dungeon.playerPosition.y;
+
+        // Check if move is valid
+        if (!this.dungeon.grid.canMoveTo(fromX, fromY, toX, toY)) {
+            return false;
+        }
+
+        // Update current room
+        this.updateCurrentRoom(toX, toY);
+
+        // Emit updates
+        this.emit('playerUpdate', this.player);
+        this.emit('dungeonUpdate', this.dungeon);
+
+        // Auto-save if enabled
+        if (this.settings.autoSave) {
+            this.saveGameData();
+        }
+
+        return true;
+    },
+
+    /**
+     * Get valid movement options from current position
+     * @returns {Array} Array of {x, y, direction} objects for valid moves
+     */
+    getValidMoves() {
+        if (!this.dungeon.grid || !this.dungeon.currentRoom) {
+            return [];
+        }
+
+        return this.dungeon.currentRoom.getConnectedAdjacent()
+            .filter(coords => this.dungeon.grid.getRoom(coords.x, coords.y))
+            .map(coords => ({
+                x: coords.x,
+                y: coords.y,
+                direction: coords.direction,
+                room: this.dungeon.grid.getRoom(coords.x, coords.y)
+            }));
     },
 
     /**
@@ -348,6 +773,11 @@ const GameState = {
             // Give experience and loot
             this.addExperience(this.combat.enemy.experience || 10);
             this.stats.monstersDefeated++;
+
+            // Mark current room as cleared
+            if (this.dungeon.currentRoom) {
+                this.dungeon.currentRoom.isCleared = true;
+            }
         } else {
             // Handle player death
             this.stats.deathCount++;
@@ -418,10 +848,36 @@ const GameState = {
                 this.stats.sessionStartTime = Date.now(); // Reset for next session
             }
 
+            // Prepare dungeon data for saving (convert Set to Array and reconstruct grid)
+            const dungeonSaveData = {
+                ...this.dungeon,
+                exploredRooms: Array.from(this.dungeon.exploredRooms),
+                grid: this.dungeon.grid ? {
+                    floor: this.dungeon.grid.floor,
+                    seed: this.dungeon.grid.seed,
+                    width: this.dungeon.grid.width,
+                    height: this.dungeon.grid.height,
+                    roomCount: this.dungeon.grid.roomCount,
+                    startPosition: this.dungeon.grid.startPosition,
+                    stairsPosition: this.dungeon.grid.stairsPosition,
+                    bossPosition: this.dungeon.grid.bossPosition,
+                    rooms: Array.from(this.dungeon.grid.rooms.entries()).map(([key, room]) => [key, {
+                        x: room.x,
+                        y: room.y,
+                        type: room.type,
+                        isExplored: room.isExplored,
+                        isCleared: room.isCleared,
+                        hasPlayer: room.hasPlayer,
+                        connections: room.connections,
+                        data: room.data
+                    }])
+                } : null
+            };
+
             // Save all game state
             const gameState = {
                 player: this.player,
-                dungeon: this.dungeon,
+                dungeon: dungeonSaveData,
                 inventory: this.inventory,
                 combat: this.combat,
                 current: this.current
@@ -461,10 +917,50 @@ const GameState = {
             const savedState = Storage.Game.loadState();
             if (savedState) {
                 if (savedState.player) Object.assign(this.player, savedState.player);
-                if (savedState.dungeon) Object.assign(this.dungeon, savedState.dungeon);
                 if (savedState.inventory) Object.assign(this.inventory, savedState.inventory);
                 if (savedState.combat) Object.assign(this.combat, savedState.combat);
                 if (savedState.current) Object.assign(this.current, savedState.current);
+
+                // Reconstruct dungeon state
+                if (savedState.dungeon) {
+                    Object.assign(this.dungeon, savedState.dungeon);
+
+                    // Convert explored rooms array back to Set
+                    if (Array.isArray(savedState.dungeon.exploredRooms)) {
+                        this.dungeon.exploredRooms = new Set(savedState.dungeon.exploredRooms);
+                    }
+
+                    // Reconstruct grid if saved
+                    if (savedState.dungeon.grid) {
+                        const gridData = savedState.dungeon.grid;
+                        this.dungeon.grid = new DungeonGrid(gridData.floor, gridData.seed);
+                        this.dungeon.grid.width = gridData.width;
+                        this.dungeon.grid.height = gridData.height;
+                        this.dungeon.grid.roomCount = gridData.roomCount;
+                        this.dungeon.grid.startPosition = gridData.startPosition;
+                        this.dungeon.grid.stairsPosition = gridData.stairsPosition;
+                        this.dungeon.grid.bossPosition = gridData.bossPosition;
+
+                        // Reconstruct rooms
+                        if (gridData.rooms) {
+                            for (const [key, roomData] of gridData.rooms) {
+                                const room = new Room(roomData.x, roomData.y, roomData.type);
+                                room.isExplored = roomData.isExplored;
+                                room.isCleared = roomData.isCleared;
+                                room.hasPlayer = roomData.hasPlayer;
+                                room.connections = roomData.connections;
+                                room.data = roomData.data;
+                                this.dungeon.grid.rooms.set(key, room);
+                            }
+                        }
+
+                        // Set current room
+                        this.dungeon.currentRoom = this.dungeon.grid.getRoom(
+                            this.dungeon.playerPosition.x,
+                            this.dungeon.playerPosition.y
+                        );
+                    }
+                }
 
                 this.current.isGameActive = true;
             }

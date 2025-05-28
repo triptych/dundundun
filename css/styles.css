@@ -581,9 +581,9 @@ body {
     background: linear-gradient(135deg, #3a3a3a 0%, #2a2a2a 100%);
     border: 2px solid #555;
     color: #e0e0e0;
-    padding: 1rem;
-    border-radius: 12px;
-    font-size: 1rem;
+    padding: 0.75rem;
+    border-radius: 10px;
+    font-size: 0.9rem;
     cursor: pointer;
     transition: all 0.2s ease;
     text-align: center;

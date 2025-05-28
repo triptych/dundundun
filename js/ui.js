@@ -89,6 +89,7 @@ const UI = {
             itemBtn: document.getElementById('item-btn'),
 
             // Menu options
+            newGameBtn: document.getElementById('new-game'),
             saveGameBtn: document.getElementById('save-game'),
             loadGameBtn: document.getElementById('load-game'),
             settingsBtn: document.getElementById('settings'),
@@ -145,6 +146,9 @@ const UI = {
         }
 
         // Menu options
+        if (this.elements.newGameBtn) {
+            this.elements.newGameBtn.addEventListener('click', () => this.showNewGameConfirmation());
+        }
         if (this.elements.saveGameBtn) {
             this.elements.saveGameBtn.addEventListener('click', () => this.saveGame());
         }
@@ -633,6 +637,132 @@ const UI = {
         if (this.elements.loadingScreen) {
             this.elements.loadingScreen.classList.add('active');
         }
+    },
+
+    /**
+     * Show new game confirmation dialog
+     */
+    showNewGameConfirmation() {
+        // Create confirmation dialog
+        const confirmDialog = document.createElement('div');
+        confirmDialog.className = 'confirmation-dialog';
+        confirmDialog.style.cssText = `
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.8);
+            z-index: 10000;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            animation: fadeIn 0.3s ease;
+        `;
+
+        const dialogContent = document.createElement('div');
+        dialogContent.className = 'confirmation-content';
+        dialogContent.style.cssText = `
+            background: linear-gradient(135deg, #2a2a2a 0%, #1a1a1a 100%);
+            border: 2px solid #444;
+            border-radius: 16px;
+            padding: 2rem;
+            max-width: 90%;
+            width: 100%;
+            max-width: 350px;
+            text-align: center;
+            animation: slideIn 0.3s ease;
+        `;
+
+        dialogContent.innerHTML = `
+            <h3 style="color: #d4af37; margin-bottom: 1rem; font-size: 1.25rem;">Start New Game?</h3>
+            <p style="color: #e0e0e0; margin-bottom: 2rem; line-height: 1.4;">
+                Are you sure you want to start a new game? This will reset all your progress and cannot be undone.
+            </p>
+            <div style="display: flex; gap: 1rem;">
+                <button id="confirm-new-game" style="
+                    flex: 1;
+                    background: linear-gradient(135deg, #cc3333 0%, #aa2222 100%);
+                    border: 2px solid #ff4444;
+                    color: #ffffff;
+                    padding: 0.75rem;
+                    border-radius: 10px;
+                    font-size: 0.9rem;
+                    font-weight: bold;
+                    cursor: pointer;
+                    transition: all 0.2s ease;
+                ">Yes, Start New Game</button>
+                <button id="cancel-new-game" style="
+                    flex: 1;
+                    background: linear-gradient(135deg, #3a3a3a 0%, #2a2a2a 100%);
+                    border: 2px solid #555;
+                    color: #e0e0e0;
+                    padding: 0.75rem;
+                    border-radius: 10px;
+                    font-size: 0.9rem;
+                    font-weight: bold;
+                    cursor: pointer;
+                    transition: all 0.2s ease;
+                ">Cancel</button>
+            </div>
+        `;
+
+        confirmDialog.appendChild(dialogContent);
+        document.body.appendChild(confirmDialog);
+
+        // Add hover effects
+        const confirmBtn = confirmDialog.querySelector('#confirm-new-game');
+        const cancelBtn = confirmDialog.querySelector('#cancel-new-game');
+
+        confirmBtn.addEventListener('mouseenter', () => {
+            confirmBtn.style.transform = 'translateY(-2px)';
+            confirmBtn.style.boxShadow = '0 4px 8px rgba(255, 68, 68, 0.3)';
+        });
+        confirmBtn.addEventListener('mouseleave', () => {
+            confirmBtn.style.transform = 'translateY(0)';
+            confirmBtn.style.boxShadow = 'none';
+        });
+
+        cancelBtn.addEventListener('mouseenter', () => {
+            cancelBtn.style.borderColor = '#d4af37';
+            cancelBtn.style.background = 'linear-gradient(135deg, #4a4a3a 0%, #3a3a2a 100%)';
+            cancelBtn.style.transform = 'translateY(-2px)';
+            cancelBtn.style.boxShadow = '0 4px 8px rgba(212, 175, 55, 0.2)';
+        });
+        cancelBtn.addEventListener('mouseleave', () => {
+            cancelBtn.style.borderColor = '#555';
+            cancelBtn.style.background = 'linear-gradient(135deg, #3a3a3a 0%, #2a2a2a 100%)';
+            cancelBtn.style.transform = 'translateY(0)';
+            cancelBtn.style.boxShadow = 'none';
+        });
+
+        // Handle button clicks
+        confirmBtn.addEventListener('click', () => {
+            this.confirmNewGame();
+            document.body.removeChild(confirmDialog);
+        });
+
+        cancelBtn.addEventListener('click', () => {
+            document.body.removeChild(confirmDialog);
+        });
+
+        // Close on outside click
+        confirmDialog.addEventListener('click', (e) => {
+            if (e.target === confirmDialog) {
+                document.body.removeChild(confirmDialog);
+            }
+        });
+    },
+
+    /**
+     * Confirm and start new game
+     */
+    confirmNewGame() {
+        if (typeof GameState !== 'undefined') {
+            GameState.newGame();
+            this.showNotification('New game started!', 2000, 'success');
+        }
+        this.closeMenu();
     }
 };
 
@@ -687,6 +817,26 @@ notificationStyles.textContent = `
 
     .save-icon {
         margin-right: 0.25rem;
+    }
+
+    @keyframes fadeIn {
+        from {
+            opacity: 0;
+        }
+        to {
+            opacity: 1;
+        }
+    }
+
+    @keyframes slideIn {
+        from {
+            opacity: 0;
+            transform: scale(0.9) translateY(-20px);
+        }
+        to {
+            opacity: 1;
+            transform: scale(1) translateY(0);
+        }
     }
 `;
 document.head.appendChild(notificationStyles);

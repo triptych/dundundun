@@ -15,6 +15,17 @@ const Game = {
     targetFPS: 60,
     frameInterval: 1000 / 60,
 
+    // Movement animation system
+    movementAnimation: {
+        isAnimating: false,
+        startPosition: { x: 0, y: 0 },
+        endPosition: { x: 0, y: 0 },
+        currentPosition: { x: 0, y: 0 },
+        duration: 300, // Animation duration in milliseconds
+        elapsed: 0,
+        easing: 'easeOutQuart' // Animation easing function
+    },
+
     // Canvas and rendering context
     canvas: null,
     ctx: null,
@@ -446,23 +457,186 @@ const Game = {
      * Render the dungeon view
      */
     renderDungeon() {
-        const centerX = this.canvas.width / 2;
-        const centerY = this.canvas.height / 2;
+        // Clear canvas first
+        this.ctx.fillStyle = '#0f0f0f';
+        this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
 
-        // Draw a simple room representation
-        this.ctx.strokeStyle = '#444';
-        this.ctx.lineWidth = 2;
-        this.ctx.strokeRect(50, 50, 200, 200);
+        // Get canvas dimensions
+        const canvasWidth = this.canvas.width / this.viewport.devicePixelRatio;
+        const canvasHeight = this.canvas.height / this.viewport.devicePixelRatio;
+        const centerX = canvasWidth / 2;
+        const centerY = canvasHeight / 2;
 
-        // Draw player position
+        // Grid settings for visual representation
+        const gridSize = 40; // Size of each grid cell in pixels
+        const gridCols = 5;
+        const gridRows = 5;
+        const gridStartX = centerX - (gridCols * gridSize) / 2;
+        const gridStartY = centerY - (gridRows * gridSize) / 2;
+
+        // Draw grid background
+        this.ctx.strokeStyle = '#333';
+        this.ctx.lineWidth = 1;
+
+        for (let x = 0; x <= gridCols; x++) {
+            const lineX = gridStartX + x * gridSize;
+            this.ctx.beginPath();
+            this.ctx.moveTo(lineX, gridStartY);
+            this.ctx.lineTo(lineX, gridStartY + gridRows * gridSize);
+            this.ctx.stroke();
+        }
+
+        for (let y = 0; y <= gridRows; y++) {
+            const lineY = gridStartY + y * gridSize;
+            this.ctx.beginPath();
+            this.ctx.moveTo(gridStartX, lineY);
+            this.ctx.lineTo(gridStartX + gridCols * gridSize, lineY);
+            this.ctx.stroke();
+        }
+
+        // Draw rooms if dungeon grid exists
+        if (GameState.dungeon.grid) {
+            this.renderRooms(gridStartX, gridStartY, gridSize);
+        }
+
+        // Calculate player render position
+        let playerRenderX, playerRenderY;
+
+        if (this.movementAnimation.isAnimating) {
+            // Use animated position
+            playerRenderX = gridStartX + (this.movementAnimation.currentPosition.x * gridSize) + gridSize / 2;
+            playerRenderY = gridStartY + (this.movementAnimation.currentPosition.y * gridSize) + gridSize / 2;
+        } else {
+            // Use actual game state position
+            const playerX = GameState.dungeon.playerPosition.x;
+            const playerY = GameState.dungeon.playerPosition.y;
+            playerRenderX = gridStartX + (playerX * gridSize) + gridSize / 2;
+            playerRenderY = gridStartY + (playerY * gridSize) + gridSize / 2;
+        }
+
+        // Draw player
         this.ctx.fillStyle = '#d4af37';
-        this.ctx.fillRect(centerX - 10, centerY - 10, 20, 20);
+        const playerSize = 12;
+        this.ctx.fillRect(
+            playerRenderX - playerSize / 2,
+            playerRenderY - playerSize / 2,
+            playerSize,
+            playerSize
+        );
+
+        // Draw player border for visibility
+        this.ctx.strokeStyle = '#fff';
+        this.ctx.lineWidth = 2;
+        this.ctx.strokeRect(
+            playerRenderX - playerSize / 2,
+            playerRenderY - playerSize / 2,
+            playerSize,
+            playerSize
+        );
 
         // Draw floor info
         this.ctx.fillStyle = '#888';
         this.ctx.font = '16px Arial';
         this.ctx.textAlign = 'center';
         this.ctx.fillText(`Floor ${GameState.player.floor}`, centerX, 30);
+
+        // Draw movement animation debug info (can be removed later)
+        if (this.movementAnimation.isAnimating) {
+            this.ctx.fillStyle = '#aaa';
+            this.ctx.font = '12px Arial';
+            this.ctx.textAlign = 'left';
+            const progress = Math.min(this.movementAnimation.elapsed / this.movementAnimation.duration, 1);
+            this.ctx.fillText(`Animating: ${(progress * 100).toFixed(1)}%`, 10, canvasHeight - 20);
+        }
+    },
+
+    /**
+     * Render rooms on the grid
+     * @param {number} gridStartX - Grid start X position
+     * @param {number} gridStartY - Grid start Y position
+     * @param {number} gridSize - Size of each grid cell
+     */
+    renderRooms(gridStartX, gridStartY, gridSize) {
+        const grid = GameState.dungeon.grid;
+        if (!grid) return;
+
+        // Room type colors
+        const roomColors = {
+            'start': '#4a9eff',    // Blue
+            'empty': '#666',       // Gray
+            'monster': '#ff6b6b',  // Red
+            'treasure': '#ffd93d', // Gold
+            'boss': '#9c27b0',     // Purple
+            'stairs': '#4caf50'    // Green
+        };
+
+        // Draw each room
+        for (const room of grid.getAllRooms()) {
+            const roomX = gridStartX + room.x * gridSize;
+            const roomY = gridStartY + room.y * gridSize;
+
+            // Room background
+            this.ctx.fillStyle = room.isExplored ? roomColors[room.type] || '#666' : '#222';
+            this.ctx.fillRect(roomX + 2, roomY + 2, gridSize - 4, gridSize - 4);
+
+            // Room border
+            this.ctx.strokeStyle = room.isExplored ? '#fff' : '#444';
+            this.ctx.lineWidth = 1;
+            this.ctx.strokeRect(roomX + 2, roomY + 2, gridSize - 4, gridSize - 4);
+
+            // Draw connections if room is explored
+            if (room.isExplored) {
+                this.drawRoomConnections(room, roomX, roomY, gridSize);
+            }
+
+            // Mark cleared rooms
+            if (room.isCleared) {
+                this.ctx.fillStyle = '#00ff00';
+                this.ctx.fillRect(roomX + gridSize - 8, roomY + 2, 6, 6);
+            }
+        }
+    },
+
+    /**
+     * Draw connections between rooms
+     * @param {Room} room - Room to draw connections for
+     * @param {number} roomX - Room X position on canvas
+     * @param {number} roomY - Room Y position on canvas
+     * @param {number} gridSize - Size of each grid cell
+     */
+    drawRoomConnections(room, roomX, roomY, gridSize) {
+        this.ctx.strokeStyle = '#fff';
+        this.ctx.lineWidth = 3;
+
+        const centerX = roomX + gridSize / 2;
+        const centerY = roomY + gridSize / 2;
+        const connectionLength = gridSize / 3;
+
+        // Draw connection lines
+        if (room.hasConnection('north')) {
+            this.ctx.beginPath();
+            this.ctx.moveTo(centerX, centerY);
+            this.ctx.lineTo(centerX, centerY - connectionLength);
+            this.ctx.stroke();
+        }
+        if (room.hasConnection('south')) {
+            this.ctx.beginPath();
+            this.ctx.moveTo(centerX, centerY);
+            this.ctx.lineTo(centerX, centerY + connectionLength);
+            this.ctx.stroke();
+        }
+        if (room.hasConnection('east')) {
+            this.ctx.beginPath();
+            this.ctx.moveTo(centerX, centerY);
+            this.ctx.lineTo(centerX + connectionLength, centerY);
+            this.ctx.stroke();
+        }
+        if (room.hasConnection('west')) {
+            this.ctx.beginPath();
+            this.ctx.moveTo(centerX, centerY);
+            this.ctx.lineTo(centerX - connectionLength, centerY);
+            this.ctx.stroke();
+        }
     },
 
     /**
@@ -483,7 +657,112 @@ const Game = {
      * @param {number} deltaTime - Time since last frame
      */
     updateAnimations(deltaTime) {
-        // Placeholder for animation updates
+        this.updateMovementAnimation(deltaTime);
+    },
+
+    /**
+     * Update movement animation
+     * @param {number} deltaTime - Time since last frame
+     */
+    updateMovementAnimation(deltaTime) {
+        if (!this.movementAnimation.isAnimating) return;
+
+        this.movementAnimation.elapsed += deltaTime;
+        const progress = Math.min(this.movementAnimation.elapsed / this.movementAnimation.duration, 1);
+
+        // Apply easing function
+        const easedProgress = this.applyEasing(progress, this.movementAnimation.easing);
+
+        // Interpolate between start and end positions
+        this.movementAnimation.currentPosition.x = this.lerp(
+            this.movementAnimation.startPosition.x,
+            this.movementAnimation.endPosition.x,
+            easedProgress
+        );
+        this.movementAnimation.currentPosition.y = this.lerp(
+            this.movementAnimation.startPosition.y,
+            this.movementAnimation.endPosition.y,
+            easedProgress
+        );
+
+        // Check if animation is complete
+        if (progress >= 1) {
+            this.completeMovementAnimation();
+        }
+    },
+
+    /**
+     * Start a movement animation
+     * @param {number} fromX - Starting X position
+     * @param {number} fromY - Starting Y position
+     * @param {number} toX - Target X position
+     * @param {number} toY - Target Y position
+     */
+    startMovementAnimation(fromX, fromY, toX, toY) {
+        this.movementAnimation.isAnimating = true;
+        this.movementAnimation.startPosition = { x: fromX, y: fromY };
+        this.movementAnimation.endPosition = { x: toX, y: toY };
+        this.movementAnimation.currentPosition = { x: fromX, y: fromY };
+        this.movementAnimation.elapsed = 0;
+
+        console.log(`Starting movement animation from (${fromX}, ${fromY}) to (${toX}, ${toY})`);
+    },
+
+    /**
+     * Complete the movement animation
+     */
+    completeMovementAnimation() {
+        this.movementAnimation.isAnimating = false;
+        this.movementAnimation.currentPosition = { ...this.movementAnimation.endPosition };
+
+        console.log('Movement animation completed');
+
+        // Trigger any post-movement events
+        this.handleRoomEvents();
+    },
+
+    /**
+     * Linear interpolation between two values
+     * @param {number} start - Start value
+     * @param {number} end - End value
+     * @param {number} progress - Progress (0-1)
+     * @returns {number} Interpolated value
+     */
+    lerp(start, end, progress) {
+        return start + (end - start) * progress;
+    },
+
+    /**
+     * Apply easing function to progress
+     * @param {number} progress - Linear progress (0-1)
+     * @param {string} easingType - Type of easing to apply
+     * @returns {number} Eased progress (0-1)
+     */
+    applyEasing(progress, easingType) {
+        switch (easingType) {
+            case 'linear':
+                return progress;
+            case 'easeInQuad':
+                return progress * progress;
+            case 'easeOutQuad':
+                return 1 - (1 - progress) * (1 - progress);
+            case 'easeInOutQuad':
+                return progress < 0.5
+                    ? 2 * progress * progress
+                    : 1 - Math.pow(-2 * progress + 2, 2) / 2;
+            case 'easeOutQuart':
+                return 1 - Math.pow(1 - progress, 4);
+            case 'easeInOutCubic':
+                return progress < 0.5
+                    ? 4 * progress * progress * progress
+                    : 1 - Math.pow(-2 * progress + 2, 3) / 2;
+            case 'easeOutBack':
+                const c1 = 1.70158;
+                const c3 = c1 + 1;
+                return 1 + c3 * Math.pow(progress - 1, 3) + c1 * Math.pow(progress - 1, 2);
+            default:
+                return progress; // Default to linear
+        }
     },
 
     /**
@@ -649,46 +928,210 @@ const Game = {
     },
 
     /**
-     * Handle movement input
+     * Handle movement input with enhanced room connectivity validation
      * @param {Object} data - Movement data
      */
     handleMovement(data) {
         const { direction } = data;
+        console.log(`Game.handleMovement called with direction: ${direction}`);
 
         // Don't process movement if in combat
         if (GameState.combat.isActive) {
             return;
         }
 
-        console.log(`Player moves ${direction}`);
+        // Don't process movement if already animating
+        if (this.movementAnimation.isAnimating) {
+            return;
+        }
 
-        // Update player position based on direction
-        let newX = GameState.player.x;
-        let newY = GameState.player.y;
+        // Don't process movement if no dungeon grid exists
+        if (!GameState.dungeon.grid) {
+            console.warn('No dungeon grid available for movement');
+            return;
+        }
+
+        console.log(`Player attempts to move ${direction}`);
+
+        // Get current position from dungeon state
+        const currentX = GameState.dungeon.playerPosition.x;
+        const currentY = GameState.dungeon.playerPosition.y;
+
+        // Calculate new position based on direction
+        let newX = currentX;
+        let newY = currentY;
 
         switch (direction) {
             case 'up':
-                newY = Math.max(0, newY - 1);
+            case 'north':
+                newY = currentY - 1;
                 break;
             case 'down':
-                newY = Math.min(4, newY + 1);
+            case 'south':
+                newY = currentY + 1;
                 break;
             case 'left':
-                newX = Math.max(0, newX - 1);
+            case 'west':
+                newX = currentX - 1;
                 break;
             case 'right':
-                newX = Math.min(4, newX + 1);
+            case 'east':
+                newX = currentX + 1;
                 break;
-            case 'center':
-                // Stay in place
-                break;
+            default:
+                console.warn(`Unknown movement direction: ${direction}`);
+                return;
         }
 
-        // Update player position
-        GameState.updatePlayer({ x: newX, y: newY });
+        // Check if move is valid before starting animation
+        if (!GameState.dungeon.grid.canMoveTo(currentX, currentY, newX, newY)) {
+            console.log(`Movement to (${newX}, ${newY}) blocked - no connection or invalid room`);
 
-        // Check for encounters
-        this.checkForEncounters();
+            // Show feedback to player about invalid movement
+            if (typeof UI !== 'undefined' && UI.showNotification) {
+                UI.showNotification('Cannot move in that direction', 1000, 'info');
+            }
+            return;
+        }
+
+        // Update game state immediately (for logic purposes)
+        const moveSuccess = GameState.movePlayer(newX, newY);
+
+        if (moveSuccess) {
+            console.log(`Player moved to (${newX}, ${newY}) - starting animation`);
+
+            // Start smooth movement animation
+            this.startMovementAnimation(currentX, currentY, newX, newY);
+
+            // Note: handleRoomEvents() will be called when animation completes
+        }
+    },
+
+    /**
+     * Handle room events when player enters a new room
+     */
+    handleRoomEvents() {
+        const currentRoom = GameState.dungeon.currentRoom;
+        if (!currentRoom) return;
+
+        // Only trigger events for newly explored rooms or uncleaered rooms
+        if (!currentRoom.isExplored) {
+            console.log(`Entering new ${currentRoom.type} room at (${currentRoom.x}, ${currentRoom.y})`);
+        }
+
+        // Handle room type specific events
+        switch (currentRoom.type) {
+            case 'monster':
+                if (!currentRoom.isCleared) {
+                    this.triggerCombat();
+                }
+                break;
+            case 'treasure':
+                if (!currentRoom.isCleared) {
+                    this.handleTreasureRoom();
+                }
+                break;
+            case 'boss':
+                if (!currentRoom.isCleared) {
+                    this.triggerBossCombat();
+                }
+                break;
+            case 'stairs':
+                this.handleStairsRoom();
+                break;
+            case 'start':
+                // Safe room, no events
+                break;
+            case 'empty':
+                // Check for random encounters in empty rooms
+                this.checkForRandomEncounters();
+                break;
+        }
+    },
+
+    /**
+     * Handle treasure room events
+     */
+    handleTreasureRoom() {
+        console.log('Found treasure!');
+
+        // Generate treasure based on floor level
+        const treasureGold = Math.floor(Math.random() * 50) + (GameState.dungeon.currentFloor * 10);
+        GameState.updateInventory({ gold: GameState.inventory.gold + treasureGold });
+
+        // Mark room as cleared
+        GameState.dungeon.currentRoom.isCleared = true;
+
+        // Show notification
+        if (typeof UI !== 'undefined' && UI.showNotification) {
+            UI.showNotification(`Found ${treasureGold} gold!`, 2000, 'success');
+        }
+    },
+
+    /**
+     * Handle stairs room events
+     */
+    handleStairsRoom() {
+        console.log('Found stairs to next floor');
+
+        // Show option to advance to next floor
+        if (typeof UI !== 'undefined' && UI.showNotification) {
+            UI.showNotification('Stairs to next floor found! (Auto-advancing in 2 seconds)', 3000, 'info');
+
+            // Auto-advance after a delay
+            setTimeout(() => {
+                this.advanceToNextFloor();
+            }, 2000);
+        }
+    },
+
+    /**
+     * Advance to the next floor
+     */
+    advanceToNextFloor() {
+        const nextFloor = GameState.dungeon.currentFloor + 1;
+        console.log(`Advancing to floor ${nextFloor}`);
+
+        // Generate new floor
+        GameState.generateNewFloor(nextFloor);
+        GameState.updatePlayer({ floor: nextFloor });
+
+        // Show notification
+        if (typeof UI !== 'undefined' && UI.showNotification) {
+            UI.showNotification(`Welcome to Floor ${nextFloor}!`, 2000, 'success');
+        }
+
+        // Update render
+        if (this.isRunning) {
+            this.render();
+        }
+    },
+
+    /**
+     * Trigger boss combat
+     */
+    triggerBossCombat() {
+        const floor = GameState.dungeon.currentFloor;
+        const boss = {
+            name: `Floor ${floor} Boss`,
+            health: 50 + (floor * 20),
+            maxHealth: 50 + (floor * 20),
+            attack: 8 + Math.floor(floor * 1.5),
+            experience: 50 + (floor * 25)
+        };
+
+        console.log('Boss encounter!');
+        GameState.startCombat(boss);
+    },
+
+    /**
+     * Check for random encounters in empty rooms
+     */
+    checkForRandomEncounters() {
+        // Lower chance for random encounters (10%)
+        if (Math.random() < 0.1) {
+            this.triggerCombat();
+        }
     },
 
     /**
@@ -758,7 +1201,7 @@ const Game = {
     },
 
     /**
-     * Check for random encounters
+     * Check for random encounters (legacy method for compatibility)
      */
     checkForEncounters() {
         // 20% chance of encounter
@@ -771,12 +1214,13 @@ const Game = {
      * Trigger a combat encounter
      */
     triggerCombat() {
+        const floor = GameState.dungeon.currentFloor;
         const enemy = {
             name: 'Goblin',
-            health: 30,
-            maxHealth: 30,
-            attack: 5,
-            experience: 10
+            health: 30 + (floor * 5),
+            maxHealth: 30 + (floor * 5),
+            attack: 5 + Math.floor(floor * 0.5),
+            experience: 10 + (floor * 3)
         };
 
         GameState.startCombat(enemy);

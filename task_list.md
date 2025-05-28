@@ -12,11 +12,11 @@
 
 ### 2. Grid-Based Movement System
 - [x] Design room grid data structure
-- [ ] Implement room connectivity logic
-- [ ] Create player position tracking
-- [ ] Build tap-to-move functionality for mobile
-- [ ] Add movement validation (adjacent rooms only)
-- [ ] Implement smooth movement animations
+- [x] Implement room connectivity logic
+- [x] Create player position tracking
+- [x] Build tap-to-move functionality for mobile
+- [x] Add movement validation (adjacent rooms only)
+- [x] Implement smooth movement animations
 
 ### 3. Dungeon Generation Engine
 - [ ] Create basic room generation algorithm

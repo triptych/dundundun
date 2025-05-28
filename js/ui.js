@@ -329,7 +329,10 @@ const UI = {
 
         // Emit movement event
         if (typeof GameState !== 'undefined') {
+            console.log('UI emitting movement event with data:', { direction });
             GameState.emit('movement', { direction });
+        } else {
+            console.error('GameState is undefined in UI.handleMovement');
         }
     },
 

@@ -269,7 +269,7 @@ class DungeonGrid {
     }
 
     /**
-     * Generate basic floor layout (to be expanded in dungeon generation)
+     * Generate floor layout with improved connectivity algorithms
      * @param {number} roomCount - Number of rooms to generate (5-10)
      */
     generateBasicLayout(roomCount = 7) {
@@ -277,47 +277,427 @@ class DungeonGrid {
         this.rooms.clear();
         this.roomCount = 0;
 
+        // Ensure room count is within bounds
+        roomCount = Math.max(5, Math.min(10, roomCount));
+
         // Create start room at center
         const startRoom = this.createRoom(this.startPosition.x, this.startPosition.y, RoomTypes.START);
 
-        // Simple linear layout for now (to be replaced with proper generation)
-        const positions = [
-            { x: 2, y: 1 }, // North
-            { x: 3, y: 2 }, // East
-            { x: 2, y: 3 }, // South
-            { x: 1, y: 2 }, // West
-            { x: 2, y: 0 }, // Far North
-            { x: 4, y: 2 }  // Far East
+        // Generate layout using improved connectivity algorithm
+        this.generateConnectedLayout(roomCount);
+
+        // Assign room types after layout is complete
+        this.assignRoomTypes();
+
+        // Validate that all rooms are reachable
+        this.validateConnectivity();
+
+        console.log(`Generated ${this.roomCount} rooms with improved connectivity`);
+    }
+
+    /**
+     * Generate a connected layout using various patterns
+     * @param {number} roomCount - Target number of rooms
+     */
+    generateConnectedLayout(roomCount) {
+        const patterns = ['linear', 'cross', 'spiral', 'branching'];
+        const selectedPattern = patterns[Math.floor(Math.random() * patterns.length)];
+
+        switch (selectedPattern) {
+            case 'linear':
+                this.generateLinearLayout(roomCount);
+                break;
+            case 'cross':
+                this.generateCrossLayout(roomCount);
+                break;
+            case 'spiral':
+                this.generateSpiralLayout(roomCount);
+                break;
+            case 'branching':
+                this.generateBranchingLayout(roomCount);
+                break;
+            default:
+                this.generateLinearLayout(roomCount);
+        }
+
+        // Add extra connections for variety (5-30% chance per potential connection)
+        this.addRandomConnections();
+    }
+
+    /**
+     * Generate a linear layout with potential branches
+     * @param {number} roomCount - Target number of rooms
+     */
+    generateLinearLayout(roomCount) {
+        const directions = [
+            { x: 0, y: -1, name: 'north' },
+            { x: 1, y: 0, name: 'east' },
+            { x: 0, y: 1, name: 'south' },
+            { x: -1, y: 0, name: 'west' }
         ];
 
-        // Create rooms and connections
-        for (let i = 0; i < Math.min(roomCount - 1, positions.length); i++) {
-            const pos = positions[i];
-            let roomType = RoomTypes.EMPTY;
+        let currentX = this.startPosition.x;
+        let currentY = this.startPosition.y;
+        const roomsToCreate = roomCount - 1; // Subtract the start room
 
-            // Last room is stairs
-            if (i === roomCount - 2) {
-                roomType = RoomTypes.STAIRS;
-                this.stairsPosition = { x: pos.x, y: pos.y };
-            }
-            // Random room types for others
-            else if (Math.random() < 0.4) {
-                roomType = RoomTypes.MONSTER;
-            } else if (Math.random() < 0.2) {
-                roomType = RoomTypes.TREASURE;
+        for (let i = 0; i < roomsToCreate; i++) {
+            // Choose a direction, preferring to continue in the same direction
+            let direction;
+            if (i === 0 || Math.random() < 0.7) {
+                // First room or continue straight
+                direction = directions[i % directions.length];
+            } else {
+                // Random direction
+                direction = directions[Math.floor(Math.random() * directions.length)];
             }
 
-            this.createRoom(pos.x, pos.y, roomType);
+            const newX = currentX + direction.x;
+            const newY = currentY + direction.y;
 
-            // Connect to start room if adjacent
-            if (Math.abs(pos.x - this.startPosition.x) + Math.abs(pos.y - this.startPosition.y) === 1) {
-                this.connectRooms(this.startPosition.x, this.startPosition.y, pos.x, pos.y);
+            // Check if position is valid and not occupied
+            if (this.isValidCoordinate(newX, newY) && !this.getRoom(newX, newY)) {
+                this.createRoom(newX, newY, RoomTypes.EMPTY);
+                this.connectRooms(currentX, currentY, newX, newY);
+                currentX = newX;
+                currentY = newY;
+            } else {
+                // Find alternative position
+                const altPosition = this.findNearestValidPosition(currentX, currentY);
+                if (altPosition) {
+                    this.createRoom(altPosition.x, altPosition.y, RoomTypes.EMPTY);
+                    this.connectRooms(currentX, currentY, altPosition.x, altPosition.y);
+                    currentX = altPosition.x;
+                    currentY = altPosition.y;
+                }
+            }
+        }
+    }
+
+    /**
+     * Generate a cross-shaped layout
+     * @param {number} roomCount - Target number of rooms
+     */
+    generateCrossLayout(roomCount) {
+        const arms = [
+            { x: 0, y: -1, name: 'north' },
+            { x: 1, y: 0, name: 'east' },
+            { x: 0, y: 1, name: 'south' },
+            { x: -1, y: 0, name: 'west' }
+        ];
+
+        const roomsPerArm = Math.floor((roomCount - 1) / arms.length);
+        const extraRooms = (roomCount - 1) % arms.length;
+
+        arms.forEach((arm, armIndex) => {
+            let currentX = this.startPosition.x;
+            let currentY = this.startPosition.y;
+            const roomsInThisArm = roomsPerArm + (armIndex < extraRooms ? 1 : 0);
+
+            for (let i = 0; i < roomsInThisArm; i++) {
+                const newX = currentX + arm.x;
+                const newY = currentY + arm.y;
+
+                if (this.isValidCoordinate(newX, newY) && !this.getRoom(newX, newY)) {
+                    this.createRoom(newX, newY, RoomTypes.EMPTY);
+                    this.connectRooms(currentX, currentY, newX, newY);
+                    currentX = newX;
+                    currentY = newY;
+                }
+            }
+        });
+    }
+
+    /**
+     * Generate a spiral layout
+     * @param {number} roomCount - Target number of rooms
+     */
+    generateSpiralLayout(roomCount) {
+        const directions = [
+            { x: 1, y: 0 },  // East
+            { x: 0, y: 1 },  // South
+            { x: -1, y: 0 }, // West
+            { x: 0, y: -1 }  // North
+        ];
+
+        let currentX = this.startPosition.x;
+        let currentY = this.startPosition.y;
+        let dirIndex = 0;
+        let steps = 1;
+        let stepCount = 0;
+        let roomsCreated = 0;
+
+        while (roomsCreated < roomCount - 1) {
+            const direction = directions[dirIndex];
+            const newX = currentX + direction.x;
+            const newY = currentY + direction.y;
+
+            if (this.isValidCoordinate(newX, newY) && !this.getRoom(newX, newY)) {
+                this.createRoom(newX, newY, RoomTypes.EMPTY);
+                this.connectRooms(currentX, currentY, newX, newY);
+                currentX = newX;
+                currentY = newY;
+                roomsCreated++;
+            }
+
+            stepCount++;
+            if (stepCount === steps) {
+                dirIndex = (dirIndex + 1) % directions.length;
+                stepCount = 0;
+                if (dirIndex % 2 === 0) {
+                    steps++;
+                }
+            }
+
+            // Safety break to prevent infinite loops
+            if (roomsCreated > roomCount * 2) break;
+        }
+    }
+
+    /**
+     * Generate a branching layout with multiple paths
+     * @param {number} roomCount - Target number of rooms
+     */
+    generateBranchingLayout(roomCount) {
+        const mainPath = Math.ceil(roomCount * 0.6); // 60% of rooms in main path
+        const branches = roomCount - mainPath;
+
+        // Create main path
+        let currentX = this.startPosition.x;
+        let currentY = this.startPosition.y;
+        const mainDirection = Math.random() < 0.5 ? { x: 1, y: 0 } : { x: 0, y: 1 };
+
+        const mainPathRooms = [];
+        for (let i = 0; i < mainPath; i++) {
+            const newX = currentX + mainDirection.x;
+            const newY = currentY + mainDirection.y;
+
+            if (this.isValidCoordinate(newX, newY)) {
+                const room = this.createRoom(newX, newY, RoomTypes.EMPTY);
+                this.connectRooms(currentX, currentY, newX, newY);
+                mainPathRooms.push({ x: newX, y: newY });
+                currentX = newX;
+                currentY = newY;
             }
         }
 
-        // Connect some additional rooms for branching paths
-        this.connectRooms(2, 1, 2, 0); // North to Far North
-        this.connectRooms(3, 2, 4, 2); // East to Far East
+        // Create branches from random points on the main path
+        for (let i = 0; i < branches; i++) {
+            if (mainPathRooms.length === 0) break;
+
+            const branchPoint = mainPathRooms[Math.floor(Math.random() * mainPathRooms.length)];
+            const branchDirection = this.getRandomUnusedDirection(branchPoint.x, branchPoint.y);
+
+            if (branchDirection) {
+                const branchX = branchPoint.x + branchDirection.x;
+                const branchY = branchPoint.y + branchDirection.y;
+
+                if (this.isValidCoordinate(branchX, branchY) && !this.getRoom(branchX, branchY)) {
+                    this.createRoom(branchX, branchY, RoomTypes.EMPTY);
+                    this.connectRooms(branchPoint.x, branchPoint.y, branchX, branchY);
+                }
+            }
+        }
+    }
+
+    /**
+     * Find a random unused direction from a position
+     * @param {number} x - X coordinate
+     * @param {number} y - Y coordinate
+     * @returns {Object|null} Direction object or null
+     */
+    getRandomUnusedDirection(x, y) {
+        const directions = [
+            { x: 0, y: -1 }, // North
+            { x: 1, y: 0 },  // East
+            { x: 0, y: 1 },  // South
+            { x: -1, y: 0 }  // West
+        ];
+
+        const availableDirections = directions.filter(dir => {
+            const checkX = x + dir.x;
+            const checkY = y + dir.y;
+            return this.isValidCoordinate(checkX, checkY) && !this.getRoom(checkX, checkY);
+        });
+
+        return availableDirections.length > 0
+            ? availableDirections[Math.floor(Math.random() * availableDirections.length)]
+            : null;
+    }
+
+    /**
+     * Find the nearest valid position for room placement
+     * @param {number} fromX - Starting X coordinate
+     * @param {number} fromY - Starting Y coordinate
+     * @returns {Object|null} Position object or null
+     */
+    findNearestValidPosition(fromX, fromY) {
+        const directions = [
+            { x: 0, y: -1 }, { x: 1, y: 0 }, { x: 0, y: 1 }, { x: -1, y: 0 },
+            { x: 1, y: -1 }, { x: 1, y: 1 }, { x: -1, y: 1 }, { x: -1, y: -1 }
+        ];
+
+        for (const dir of directions) {
+            const checkX = fromX + dir.x;
+            const checkY = fromY + dir.y;
+
+            if (this.isValidCoordinate(checkX, checkY) && !this.getRoom(checkX, checkY)) {
+                return { x: checkX, y: checkY };
+            }
+        }
+
+        return null;
+    }
+
+    /**
+     * Add random connections between existing rooms for variety
+     */
+    addRandomConnections() {
+        const rooms = this.getAllRooms();
+        const connectionChance = 0.15; // 15% chance per potential connection
+
+        rooms.forEach(room => {
+            const directions = [
+                { x: 0, y: -1, name: 'north' },
+                { x: 1, y: 0, name: 'east' },
+                { x: 0, y: 1, name: 'south' },
+                { x: -1, y: 0, name: 'west' }
+            ];
+
+            directions.forEach(dir => {
+                const adjacentX = room.x + dir.x;
+                const adjacentY = room.y + dir.y;
+                const adjacentRoom = this.getRoom(adjacentX, adjacentY);
+
+                // Only add connection if adjacent room exists and no connection already exists
+                if (adjacentRoom && !room.hasConnection(dir.name) && Math.random() < connectionChance) {
+                    this.connectRooms(room.x, room.y, adjacentX, adjacentY);
+                }
+            });
+        });
+    }
+
+    /**
+     * Assign room types after layout generation
+     */
+    assignRoomTypes() {
+        const rooms = this.getAllRooms().filter(room => room.type === RoomTypes.EMPTY);
+
+        if (rooms.length === 0) return;
+
+        // Place stairs room (furthest from start)
+        const stairsRoom = this.getFurthestRoom();
+        if (stairsRoom) {
+            stairsRoom.type = RoomTypes.STAIRS;
+            this.stairsPosition = { x: stairsRoom.x, y: stairsRoom.y };
+            rooms.splice(rooms.indexOf(stairsRoom), 1);
+        }
+
+        // Place boss room if enough rooms (at least 7 rooms total)
+        if (this.roomCount >= 7 && rooms.length > 0) {
+            const bossRoom = rooms[Math.floor(Math.random() * rooms.length)];
+            bossRoom.type = RoomTypes.BOSS;
+            this.bossPosition = { x: bossRoom.x, y: bossRoom.y };
+            rooms.splice(rooms.indexOf(bossRoom), 1);
+        }
+
+        // Assign remaining room types
+        rooms.forEach(room => {
+            const rand = Math.random();
+            if (rand < 0.3) {
+                room.type = RoomTypes.MONSTER;
+            } else if (rand < 0.5) {
+                room.type = RoomTypes.TREASURE;
+            }
+            // Otherwise stays EMPTY
+        });
+    }
+
+    /**
+     * Get the room furthest from the start position
+     * @returns {Room|null} Furthest room or null
+     */
+    getFurthestRoom() {
+        const rooms = this.getAllRooms().filter(room => room.type === RoomTypes.EMPTY);
+        if (rooms.length === 0) return null;
+
+        let furthestRoom = null;
+        let maxDistance = -1;
+
+        rooms.forEach(room => {
+            const distance = Math.abs(room.x - this.startPosition.x) + Math.abs(room.y - this.startPosition.y);
+            if (distance > maxDistance) {
+                maxDistance = distance;
+                furthestRoom = room;
+            }
+        });
+
+        return furthestRoom;
+    }
+
+    /**
+     * Validate that all rooms are reachable from the start position
+     * @returns {boolean} True if all rooms are reachable
+     */
+    validateConnectivity() {
+        const allRooms = this.getAllRooms();
+        const reachableRooms = new Set();
+        const queue = [this.getRoom(this.startPosition.x, this.startPosition.y)];
+
+        // Breadth-first search to find all reachable rooms
+        while (queue.length > 0) {
+            const currentRoom = queue.shift();
+            if (!currentRoom || reachableRooms.has(currentRoom)) continue;
+
+            reachableRooms.add(currentRoom);
+
+            // Add connected adjacent rooms to queue
+            const connectedAdjacent = this.getAdjacentConnectedRooms(currentRoom.x, currentRoom.y);
+            connectedAdjacent.forEach(room => {
+                if (!reachableRooms.has(room)) {
+                    queue.push(room);
+                }
+            });
+        }
+
+        const isValid = reachableRooms.size === allRooms.length;
+
+        if (!isValid) {
+            console.warn(`Connectivity validation failed: ${reachableRooms.size}/${allRooms.length} rooms reachable`);
+            this.fixConnectivity(allRooms, reachableRooms);
+        }
+
+        return isValid;
+    }
+
+    /**
+     * Fix connectivity issues by connecting unreachable rooms
+     * @param {Array} allRooms - All rooms in the dungeon
+     * @param {Set} reachableRooms - Set of currently reachable rooms
+     */
+    fixConnectivity(allRooms, reachableRooms) {
+        const unreachableRooms = allRooms.filter(room => !reachableRooms.has(room));
+
+        unreachableRooms.forEach(unreachableRoom => {
+            // Find the closest reachable room
+            let closestRoom = null;
+            let minDistance = Infinity;
+
+            reachableRooms.forEach(reachableRoom => {
+                const distance = Math.abs(unreachableRoom.x - reachableRoom.x) +
+                               Math.abs(unreachableRoom.y - reachableRoom.y);
+                if (distance < minDistance) {
+                    minDistance = distance;
+                    closestRoom = reachableRoom;
+                }
+            });
+
+            // Connect to closest reachable room if adjacent
+            if (closestRoom && minDistance === 1) {
+                this.connectRooms(unreachableRoom.x, unreachableRoom.y, closestRoom.x, closestRoom.y);
+                reachableRooms.add(unreachableRoom);
+                console.log(`Connected unreachable room at (${unreachableRoom.x}, ${unreachableRoom.y}) to (${closestRoom.x}, ${closestRoom.y})`);
+            }
+        });
     }
 }
 
@@ -1003,14 +1383,20 @@ const GameState = {
      * @param {*} data - Event data
      */
     emit(event, data) {
+        console.log(`GameState.emit called for event: ${event} with data:`, data);
+        console.log(`Available listeners for ${event}:`, this.listeners[event] ? this.listeners[event].length : 0);
+
         if (this.listeners[event]) {
-            this.listeners[event].forEach(callback => {
+            this.listeners[event].forEach((callback, index) => {
                 try {
+                    console.log(`Calling listener ${index} for event ${event}`);
                     callback(data);
                 } catch (error) {
                     console.error(`Error in ${event} listener:`, error);
                 }
             });
+        } else {
+            console.warn(`No listeners registered for event: ${event}`);
         }
     },
 

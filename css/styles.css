@@ -231,8 +231,8 @@ body {
     border-radius: 12px;
     font-size: 1.5rem;
     font-weight: bold;
-    min-width: 50px;
-    min-height: 50px;
+    width: 45px;
+    height: 45px;
     cursor: pointer;
     transition: all 0.2s ease;
     display: flex;

@@ -793,7 +793,8 @@ const GameState = {
         playerUpdate: [],
         inventoryUpdate: [],
         combatUpdate: [],
-        dungeonUpdate: []
+        dungeonUpdate: [],
+        movement: []
     },
 
     /**

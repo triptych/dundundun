@@ -794,7 +794,9 @@ const GameState = {
         inventoryUpdate: [],
         combatUpdate: [],
         dungeonUpdate: [],
-        movement: []
+        movement: [],
+        combatAction: [],
+        inventoryAction: []
     },
 
     /**

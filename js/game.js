@@ -100,7 +100,10 @@ const Game = {
         GameState.on('movement', (data) => this.handleMovement(data));
 
         // Listen for combat actions from UI
-        GameState.on('combatAction', (data) => this.handleCombatAction(data));
+        GameState.on('combatAction', (data) => {
+            console.log('Game received combatAction event:', data);
+            this.handleCombatAction(data);
+        });
 
         // Listen for inventory actions from UI
         GameState.on('inventoryAction', (data) => this.handleInventoryAction(data));

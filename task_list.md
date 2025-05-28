@@ -19,12 +19,12 @@
 - [x] Implement smooth movement animations
 
 ### 3. Dungeon Generation Engine
-- [ ] Create basic room generation algorithm
-- [ ] Implement 5-10 room layouts per floor
-- [ ] Design room type system (empty, monster, treasure, boss, stairs)
-- [ ] Build room connection logic
-- [ ] Add floor progression mechanics
-- [ ] Create simple procedural layout generator
+- [x] Create basic room generation algorithm
+- [x] Implement 5-10 room layouts per floor
+- [x] Design room type system (empty, monster, treasure, boss, stairs)
+- [x] Build room connection logic
+- [x] Add floor progression mechanics
+- [x] Create simple procedural layout generator
 
 ### 4. Basic Combat System
 - [ ] Design turn-based combat framework

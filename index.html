@@ -180,6 +180,29 @@
 
             <div id="combat-overlay" class="overlay">
                 <div class="combat-ui">
+                    <!-- Player Combat Info -->
+                    <div class="player-combat-info">
+                        <div class="combat-character-name">Player</div>
+                        <div class="player-hp-bar">
+                            <div class="hp-fill" id="player-combat-hp-fill"></div>
+                            <span class="hp-text" id="player-combat-hp-text">100/100</span>
+                        </div>
+                        <div class="combat-stats" id="combat-stats">
+                            <div class="combat-stat">
+                                <span class="stat-label">ATK:</span>
+                                <span class="stat-value" id="combat-attack-power">25</span>
+                            </div>
+                            <div class="combat-stat">
+                                <span class="stat-label">CRIT:</span>
+                                <span class="stat-value" id="combat-crit-chance">10%</span>
+                            </div>
+                        </div>
+                        <div class="combat-buffs" id="combat-buffs">
+                            <!-- Buffs/debuffs will be added here -->
+                        </div>
+                    </div>
+
+                    <!-- Enemy Combat Info -->
                     <div class="enemy-info">
                         <div class="enemy-name" id="enemy-name">Goblin</div>
                         <div class="enemy-hp-bar">

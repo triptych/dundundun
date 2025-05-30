@@ -40,15 +40,65 @@ const Combat = {
     },
 
     /**
+     * Calculate player's attack power based on strength
+     * @returns {number} Attack power
+     */
+    calculateAttackPower() {
+        return Math.floor(10 + (GameState.player.strength * 1.5));
+    },
+
+    /**
+     * Calculate player's critical hit chance based on agility
+     * @returns {number} Critical hit chance percentage
+     */
+    calculateCritChance() {
+        return 5 + (GameState.player.agility * 0.5);
+    },
+
+    /**
+     * Check if attack is a critical hit
+     * @returns {boolean} True if critical hit
+     */
+    isCriticalHit() {
+        const critChance = this.calculateCritChance();
+        return Math.random() * 100 < critChance;
+    },
+
+    /**
+     * Calculate damage reduction from vitality (toughness)
+     * @param {number} incomingDamage - Raw incoming damage
+     * @returns {number} Reduced damage
+     */
+    calculateDamageReduction(incomingDamage) {
+        // Vitality provides damage reduction: 1 point = 2% reduction, max 50%
+        const reductionPercent = Math.min(50, GameState.player.vitality * 2);
+        const reduction = incomingDamage * (reductionPercent / 100);
+        return Math.floor(incomingDamage - reduction);
+    },
+
+    /**
      * Perform a basic attack
      */
     performAttack() {
         if (!GameState.combat.enemy) return;
 
-        const damage = GameState.player.strength + Utils.randomInt(1, 6);
-        GameState.combat.enemy.health -= damage;
+        // Calculate base damage using derived attack power
+        const baseAttackPower = this.calculateAttackPower();
+        const damage = baseAttackPower + Utils.randomInt(1, 6);
 
-        GameState.combat.log.push(`You deal ${damage} damage!`);
+        // Check for critical hit based on agility
+        const isCritical = this.isCriticalHit();
+
+        let finalDamage = damage;
+        let logMessage = `You deal ${damage} damage!`;
+
+        if (isCritical) {
+            finalDamage = Math.floor(damage * 1.5);
+            logMessage = `Critical hit! You deal ${finalDamage} damage!`;
+        }
+
+        GameState.combat.enemy.health -= finalDamage;
+        GameState.combat.log.push(logMessage);
 
         if (GameState.combat.enemy.health <= 0) {
             this.endCombat(true);
@@ -68,11 +118,27 @@ const Combat = {
 
         if (!GameState.combat.enemy) return;
 
-        const damage = (GameState.player.strength * 1.5) + Utils.randomInt(2, 8);
-        GameState.combat.enemy.health -= damage;
+        // Heavy attack does more damage and has higher crit chance
+        const baseAttackPower = this.calculateAttackPower();
+        const damage = Math.floor(baseAttackPower * 1.5) + Utils.randomInt(2, 8);
+
+        // Heavy attacks have +20% crit chance
+        const baseCritChance = this.calculateCritChance();
+        const enhancedCritChance = baseCritChance + 20;
+        const isCritical = Math.random() * 100 < enhancedCritChance;
+
+        let finalDamage = damage;
+        let logMessage = `You deal ${damage} heavy damage!`;
+
+        if (isCritical) {
+            finalDamage = Math.floor(damage * 1.5);
+            logMessage = `Critical heavy attack! You deal ${finalDamage} damage!`;
+        }
+
+        GameState.combat.enemy.health -= finalDamage;
         GameState.combat.cooldowns.heavyAttack = 3000; // 3 second cooldown
 
-        GameState.combat.log.push(`You deal ${damage} heavy damage!`);
+        GameState.combat.log.push(logMessage);
 
         if (GameState.combat.enemy.health <= 0) {
             this.endCombat(true);
@@ -152,7 +218,15 @@ const Combat = {
             actualDamage = Math.floor(enemyDamage * 0.5);
             GameState.combat.log.push(`Enemy attacks for ${enemyDamage} damage, blocked for ${actualDamage}!`);
         } else {
-            GameState.combat.log.push(`Enemy attacks for ${actualDamage} damage!`);
+            // Apply vitality-based damage reduction
+            actualDamage = this.calculateDamageReduction(enemyDamage);
+
+            if (actualDamage < enemyDamage) {
+                const reduction = enemyDamage - actualDamage;
+                GameState.combat.log.push(`Enemy attacks for ${enemyDamage} damage, reduced by ${reduction} (vitality)! You take ${actualDamage} damage.`);
+            } else {
+                GameState.combat.log.push(`Enemy attacks for ${actualDamage} damage!`);
+            }
         }
 
         GameState.updatePlayer({ health: GameState.player.health - actualDamage });
@@ -180,9 +254,7 @@ const Combat = {
                 const exp = GameState.combat.enemy.experience || 10;
                 const gold = Math.floor(Math.random() * 20) + 5;
 
-                GameState.updatePlayer({
-                    experience: GameState.player.experience + exp
-                });
+                GameState.addExperience(exp); // Use addExperience to handle level up
                 GameState.updateInventory({
                     gold: GameState.inventory.gold + gold
                 });
@@ -363,6 +435,18 @@ const Combat = {
             default:
                 return 0;
         }
+    },
+
+    /**
+     * Get current combat stats summary for display
+     * @returns {Object} Combat stats summary
+     */
+    getCombatStats() {
+        return {
+            attackPower: this.calculateAttackPower(),
+            critChance: this.calculateCritChance(),
+            damageReduction: Math.min(50, GameState.player.vitality * 2)
+        };
     }
 };
 

@@ -79,6 +79,14 @@ const UI = {
 
             // Combat
             combatOverlay: document.getElementById('combat-overlay'),
+            // Player combat info
+            playerCombatHpFill: document.getElementById('player-combat-hp-fill'),
+            playerCombatHpText: document.getElementById('player-combat-hp-text'),
+            combatAttackPower: document.getElementById('combat-attack-power'),
+            combatCritChance: document.getElementById('combat-crit-chance'),
+            combatBuffs: document.getElementById('combat-buffs'),
+
+            // Enemy combat info
             enemyName: document.getElementById('enemy-name'),
             enemyHpFill: document.getElementById('enemy-hp-fill'),
             enemyHpText: document.getElementById('enemy-hp-text'),
@@ -451,6 +459,47 @@ const UI = {
         if (combat.isActive) {
             this.elements.combatOverlay.classList.add('active');
 
+            // Update player combat info
+            if (typeof GameState !== 'undefined' && GameState.player) {
+                const player = GameState.player;
+
+                // Update player health bar
+                if (this.elements.playerCombatHpFill && this.elements.playerCombatHpText) {
+                    const playerHpPercent = (player.health / player.maxHealth) * 100;
+                    this.elements.playerCombatHpFill.style.width = `${playerHpPercent}%`;
+                    this.elements.playerCombatHpText.textContent = `${player.health}/${player.maxHealth}`;
+                }
+
+                // Update combat stats from Combat system
+                if (typeof Combat !== 'undefined') {
+                    const combatStats = Combat.getCombatStats();
+
+                    if (this.elements.combatAttackPower) {
+                        this.elements.combatAttackPower.textContent = combatStats.attackPower;
+                    }
+
+                    if (this.elements.combatCritChance) {
+                        this.elements.combatCritChance.textContent = `${Math.round(combatStats.critChance)}%`;
+                    }
+                }
+
+                // Update buffs/debuffs
+                if (this.elements.combatBuffs) {
+                    // Clear existing buffs
+                    this.elements.combatBuffs.innerHTML = '';
+
+                    // Add blocking buff if player blocked last turn
+                    if (combat.lastAction === 'block') {
+                        const blockBuff = document.createElement('div');
+                        blockBuff.className = 'combat-buff blocking';
+                        blockBuff.textContent = '🛡️ Blocking';
+                        blockBuff.title = 'Damage reduced by 50%';
+                        this.elements.combatBuffs.appendChild(blockBuff);
+                    }
+                }
+            }
+
+            // Update enemy combat info
             if (combat.enemy) {
                 if (this.elements.enemyName) {
                     this.elements.enemyName.textContent = combat.enemy.name || 'Enemy';

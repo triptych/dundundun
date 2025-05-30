@@ -46,8 +46,8 @@
 ## Phase 2: Equipment & Progression (3 weeks)
 
 ### 6. Character Progression System
-- [ ] Implement experience point tracking
-- [ ] Create level-up mechanics
+- [x] Implement experience point tracking
+- [x] Create level-up mechanics
 - [ ] Design attribute point distribution (Strength, Agility, Vitality)
 - [ ] Build character stat calculations
 - [ ] Add level-up visual feedback

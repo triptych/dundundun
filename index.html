@@ -30,6 +30,10 @@
                             <span class="stat-value" id="player-hp">100/100</span>
                         </div>
                         <div class="stat-item">
+                            <span class="stat-label">Lvl</span>
+                            <span class="stat-value" id="header-level">1</span>
+                        </div>
+                        <div class="stat-item">
                             <span class="stat-label">Floor</span>
                             <span class="stat-value" id="current-floor">1</span>
                         </div>
@@ -98,19 +102,67 @@
                     </div>
                     <div class="stat-row">
                         <span class="stat-name">Experience</span>
-                        <span class="stat-value" id="player-exp">0/100</span>
+                        <div class="exp-container">
+                            <span class="stat-value" id="player-exp">0/100</span>
+                            <div class="exp-bar">
+                                <div class="exp-fill" id="exp-fill"></div>
+                            </div>
+                        </div>
                     </div>
-                    <div class="stat-row">
-                        <span class="stat-name">Strength</span>
-                        <span class="stat-value" id="player-strength">10</span>
+
+                    <!-- Available Points Display -->
+                    <div class="available-points-display" id="available-points-display" style="display: none;">
+                        <span class="points-label">Available Points:</span>
+                        <span class="points-value" id="available-points">0</span>
                     </div>
-                    <div class="stat-row">
-                        <span class="stat-name">Agility</span>
-                        <span class="stat-value" id="player-agility">10</span>
+
+                    <!-- Attribute Allocation Section -->
+                    <div class="attributes-section">
+                        <h4>Attributes</h4>
+
+                        <div class="attribute-row">
+                            <span class="attribute-name">Strength</span>
+                            <div class="attribute-controls">
+                                <button class="attribute-btn decrease" id="str-decrease">-</button>
+                                <span class="attribute-value" id="player-strength">10</span>
+                                <button class="attribute-btn increase" id="str-increase">+</button>
+                            </div>
+                        </div>
+
+                        <div class="attribute-row">
+                            <span class="attribute-name">Agility</span>
+                            <div class="attribute-controls">
+                                <button class="attribute-btn decrease" id="agi-decrease">-</button>
+                                <span class="attribute-value" id="player-agility">10</span>
+                                <button class="attribute-btn increase" id="agi-increase">+</button>
+                            </div>
+                        </div>
+
+                        <div class="attribute-row">
+                            <span class="attribute-name">Vitality</span>
+                            <div class="attribute-controls">
+                                <button class="attribute-btn decrease" id="vit-decrease">-</button>
+                                <span class="attribute-value" id="player-vitality">10</span>
+                                <button class="attribute-btn increase" id="vit-increase">+</button>
+                            </div>
+                        </div>
                     </div>
-                    <div class="stat-row">
-                        <span class="stat-name">Vitality</span>
-                        <span class="stat-value" id="player-vitality">10</span>
+
+                    <!-- Derived Stats Section -->
+                    <div class="derived-stats-section">
+                        <h4>Combat Stats</h4>
+                        <div class="stat-row">
+                            <span class="stat-name">Attack Power</span>
+                            <span class="stat-value" id="attack-power">25</span>
+                        </div>
+                        <div class="stat-row">
+                            <span class="stat-name">Crit Chance</span>
+                            <span class="stat-value" id="crit-chance">10%</span>
+                        </div>
+                        <div class="stat-row">
+                            <span class="stat-name">Max Health</span>
+                            <span class="stat-value" id="max-health">120</span>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -148,6 +200,21 @@
                     </div>
                 </div>
             </div>
+
+            <!-- Level Up Overlay -->
+            <div id="level-up-overlay" class="overlay level-up-overlay">
+                <div class="level-up-content">
+                    <h2>Level Up!</h2>
+                    <div class="level-up-info">
+                        <div class="new-level" id="new-level-display">Level 2</div>
+                        <div class="level-benefits">
+                            <div class="benefit-item">+3 Attribute Points</div>
+                            <div class="benefit-item" id="health-increase">+7 Max Health</div>
+                        </div>
+                    </div>
+                    <button class="level-up-continue" id="level-up-continue">Continue</button>
+                </div>
+            </div>
         </div>
 
         <script src="js/utils.js"></script>
@@ -156,6 +223,7 @@
         <script src="js/rendering.js"></script>
         <script src="js/animation.js"></script>
         <script src="js/combat.js"></script>
+        <script src="js/character-progression.js"></script>
         <script src="js/movement.js"></script>
         <script src="js/rooms.js"></script>
         <script src="js/save-system.js"></script>

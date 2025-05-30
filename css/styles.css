@@ -425,6 +425,299 @@ body {
 }
 
 /* ============================================
+   Experience Bar
+   ============================================ */
+
+.exp-container {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    flex: 1;
+    margin-left: 1rem;
+}
+
+.exp-bar {
+    background-color: #333;
+    border: 1px solid #555;
+    border-radius: 10px;
+    height: 8px;
+    overflow: hidden;
+    position: relative;
+}
+
+.exp-fill {
+    background: linear-gradient(90deg, #4dabf7 0%, #339af0 100%);
+    height: 100%;
+    width: 0%;
+    transition: width 0.3s ease;
+}
+
+/* ============================================
+   Attribute Point Allocation
+   ============================================ */
+
+.available-points-display {
+    background: linear-gradient(135deg, #2a3a2a 0%, #1e2e1e 100%);
+    border: 2px solid #4a7c59;
+    border-radius: 8px;
+    padding: 0.75rem;
+    margin: 1rem 0;
+    text-align: center;
+}
+
+.points-label {
+    color: #51cf66;
+    font-weight: 500;
+    margin-right: 0.5rem;
+}
+
+.points-value {
+    color: #51cf66;
+    font-weight: bold;
+    font-size: 1.1rem;
+}
+
+.attributes-section {
+    margin: 1.5rem 0;
+}
+
+.attributes-section h4 {
+    color: #d4af37;
+    font-size: 1.1rem;
+    margin-bottom: 1rem;
+    padding-bottom: 0.5rem;
+    border-bottom: 2px solid #333;
+}
+
+.attribute-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0.75rem 0;
+    border-bottom: 1px solid #2a2a2a;
+}
+
+.attribute-row:last-child {
+    border-bottom: none;
+}
+
+.attribute-name {
+    color: #ccc;
+    font-weight: 500;
+    flex: 1;
+}
+
+.attribute-controls {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+}
+
+.attribute-btn {
+    background: linear-gradient(135deg, #3a3a3a 0%, #2a2a2a 100%);
+    border: 2px solid #555;
+    color: #e0e0e0;
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    font-size: 1.2rem;
+    font-weight: bold;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 32px;
+    min-height: 32px;
+}
+
+.attribute-btn:hover:not(:disabled) {
+    border-color: #d4af37;
+    background: linear-gradient(135deg, #4a4a3a 0%, #3a3a2a 100%);
+    transform: scale(1.1);
+}
+
+.attribute-btn:active:not(:disabled) {
+    transform: scale(0.95);
+}
+
+.attribute-btn:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+    transform: none;
+}
+
+.attribute-btn.increase {
+    border-color: #51cf66;
+    color: #51cf66;
+}
+
+.attribute-btn.decrease {
+    border-color: #ff6b6b;
+    color: #ff6b6b;
+}
+
+.attribute-btn.increase:hover:not(:disabled) {
+    background: linear-gradient(135deg, #3a4a3a 0%, #2a3a2a 100%);
+    border-color: #51cf66;
+}
+
+.attribute-btn.decrease:hover:not(:disabled) {
+    background: linear-gradient(135deg, #4a3a3a 0%, #3a2a2a 100%);
+    border-color: #ff6b6b;
+}
+
+.attribute-value {
+    color: #fff;
+    font-weight: bold;
+    font-size: 1.1rem;
+    min-width: 30px;
+    text-align: center;
+}
+
+/* ============================================
+   Derived Stats Section
+   ============================================ */
+
+.derived-stats-section {
+    margin-top: 1.5rem;
+}
+
+.derived-stats-section h4 {
+    color: #d4af37;
+    font-size: 1.1rem;
+    margin-bottom: 1rem;
+    padding-bottom: 0.5rem;
+    border-bottom: 2px solid #333;
+}
+
+/* ============================================
+   Level Up Overlay
+   ============================================ */
+
+.level-up-overlay {
+    z-index: 3000;
+}
+
+.level-up-content {
+    background: linear-gradient(135deg, #2a3a2a 0%, #1a2a1a 100%);
+    border: 3px solid #51cf66;
+    border-radius: 16px;
+    padding: 2rem;
+    max-width: 90%;
+    width: 100%;
+    max-width: 350px;
+    text-align: center;
+    animation: levelUpAppear 0.3s ease-out;
+}
+
+@keyframes levelUpAppear {
+    0% {
+        transform: scale(0.8) translateY(-20px);
+        opacity: 0;
+    }
+    100% {
+        transform: scale(1) translateY(0);
+        opacity: 1;
+    }
+}
+
+.level-up-content h2 {
+    color: #51cf66;
+    font-size: 2rem;
+    margin-bottom: 1.5rem;
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+}
+
+.level-up-info {
+    margin-bottom: 2rem;
+}
+
+.new-level {
+    color: #d4af37;
+    font-size: 1.5rem;
+    font-weight: bold;
+    margin-bottom: 1rem;
+}
+
+.level-benefits {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.benefit-item {
+    color: #ccc;
+    font-size: 1rem;
+    padding: 0.5rem;
+    background: rgba(81, 207, 102, 0.1);
+    border-radius: 6px;
+    border: 1px solid rgba(81, 207, 102, 0.3);
+}
+
+.level-up-continue {
+    background: linear-gradient(135deg, #51cf66 0%, #40c057 100%);
+    border: 2px solid #51cf66;
+    color: #fff;
+    padding: 1rem 2rem;
+    border-radius: 10px;
+    font-size: 1.1rem;
+    font-weight: bold;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    min-height: 50px;
+    min-width: 120px;
+}
+
+.level-up-continue:hover {
+    background: linear-gradient(135deg, #40c057 0%, #37b24d 100%);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(81, 207, 102, 0.3);
+}
+
+.level-up-continue:active {
+    transform: translateY(0);
+}
+
+/* ============================================
+   Attribute Change Animations
+   ============================================ */
+
+.stat-increase {
+    color: #51cf66 !important;
+    animation: statIncrease 0.3s ease;
+}
+
+.stat-decrease {
+    color: #ff6b6b !important;
+    animation: statDecrease 0.3s ease;
+}
+
+@keyframes statIncrease {
+    0% {
+        transform: scale(1);
+    }
+    50% {
+        transform: scale(1.2);
+    }
+    100% {
+        transform: scale(1);
+    }
+}
+
+@keyframes statDecrease {
+    0% {
+        transform: scale(1);
+    }
+    50% {
+        transform: scale(0.8);
+    }
+    100% {
+        transform: scale(1);
+    }
+}
+
+/* ============================================
    Skills System
    ============================================ */
 

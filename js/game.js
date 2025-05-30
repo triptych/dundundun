@@ -1,6 +1,7 @@
 // Pocket Dungeon - Main Game Controller
 // Entry point and main game loop management
 
+
 /**
  * Main game controller that orchestrates all game systems
  */
@@ -82,6 +83,10 @@ const Game = {
         // Initialize UI system
         if (typeof UI !== 'undefined') {
             UI.init();
+        }
+
+        if (typeof CharacterProgression !== 'undefined') {
+            CharacterProgression.init();
         }
 
         // Set up event listeners between systems

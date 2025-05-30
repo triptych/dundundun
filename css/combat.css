@@ -1,0 +1,111 @@
+/* Combat System */
+
+#combat-overlay {
+    z-index: 2000;
+}
+
+.combat-ui {
+    background: linear-gradient(135deg, #2a1810 0%, #1a1a1a 100%);
+    border: 2px solid #444;
+    border-radius: 16px;
+    padding: 2rem;
+    max-width: 90%;
+    width: 100%;
+    max-width: 400px;
+}
+
+.enemy-info {
+    text-align: center;
+    margin-bottom: 2rem;
+}
+
+.enemy-name {
+    font-size: 1.5rem;
+    font-weight: bold;
+    color: #ff6b6b;
+    margin-bottom: 1rem;
+}
+
+.enemy-hp-bar {
+    background-color: #333;
+    border: 2px solid #555;
+    border-radius: 20px;
+    height: 30px;
+    position: relative;
+    overflow: hidden;
+}
+
+.hp-fill {
+    background: linear-gradient(90deg, #ff4444 0%, #cc3333 100%);
+    height: 100%;
+    width: 100%;
+    transition: width 0.3s ease;
+}
+
+.hp-text {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    color: #fff;
+    font-weight: bold;
+    font-size: 0.9rem;
+    text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.8);
+}
+
+.combat-actions {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0.75rem;
+    margin-bottom: 1.5rem;
+}
+
+.combat-btn {
+    background: linear-gradient(135deg, #4a3a2a 0%, #3a2a1a 100%);
+    border: 2px solid #666;
+    color: #e0e0e0;
+    padding: 1rem;
+    border-radius: 12px;
+    font-size: 1rem;
+    font-weight: bold;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    min-height: 50px;
+}
+
+.combat-btn:hover, .combat-btn:focus {
+    border-color: #d4af37;
+    background: linear-gradient(135deg, #5a4a3a 0%, #4a3a2a 100%);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(212, 175, 55, 0.2);
+}
+
+.combat-btn:active {
+    transform: translateY(0);
+}
+
+.combat-btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    transform: none !important;
+}
+
+.combat-log {
+    background-color: rgba(0, 0, 0, 0.3);
+    border: 1px solid #444;
+    border-radius: 8px;
+    padding: 1rem;
+    max-height: 120px;
+    overflow-y: auto;
+}
+
+.log-entry {
+    color: #ccc;
+    font-size: 0.9rem;
+    margin-bottom: 0.5rem;
+    padding: 0.25rem 0;
+}
+
+.log-entry:last-child {
+    margin-bottom: 0;
+}

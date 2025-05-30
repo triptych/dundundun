@@ -1,0 +1,47 @@
+/* Menu System */
+
+.menu-content {
+    background: linear-gradient(135deg, #2a2a2a 0%, #1a1a1a 100%);
+    border: 2px solid #444;
+    border-radius: 16px;
+    padding: 2rem;
+    max-width: 90%;
+    width: 100%;
+    max-width: 300px;
+}
+
+.menu-content h2 {
+    color: #d4af37;
+    text-align: center;
+    margin-bottom: 2rem;
+    font-size: 1.5rem;
+}
+
+.menu-options {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+}
+
+.menu-option {
+    background: linear-gradient(135deg, #3a3a3a 0%, #2a2a2a 100%);
+    border: 2px solid #555;
+    color: #e0e0e0;
+    padding: 0.75rem;
+    border-radius: 10px;
+    font-size: 0.9rem;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    text-align: center;
+}
+
+.menu-option:hover, .menu-option:focus {
+    border-color: #d4af37;
+    background: linear-gradient(135deg, #4a4a3a 0%, #3a3a2a 100%);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(212, 175, 55, 0.2);
+}
+
+.menu-option:active {
+    transform: translateY(0);
+}

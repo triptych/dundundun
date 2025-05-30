@@ -1,0 +1,67 @@
+/* Responsive Design & Accessibility */
+
+/* Responsive Design - Larger Screens */
+
+@media (min-width: 768px) {
+    html {
+        font-size: 18px;
+    }
+
+    .loading-content h1 {
+        font-size: 3rem;
+    }
+
+    .movement-controls {
+        max-width: 250px;
+        gap: 1rem;
+    }
+
+    .move-btn {
+        min-width: 50px;
+        min-height: 50px;
+        font-size: 1.75rem;
+    }
+
+    .inventory-grid {
+        grid-template-columns: repeat(5, 1fr);
+    }
+
+    .combat-ui {
+        max-width: 500px;
+    }
+}
+
+@media (min-width: 1024px) {
+    .inventory-grid {
+        grid-template-columns: repeat(6, 1fr);
+    }
+}
+
+/* Accessibility & Touch Improvements */
+
+@media (pointer: coarse) {
+    .move-btn, .nav-btn, .icon-btn, .combat-btn, .menu-option {
+        min-height: 48px;
+    }
+}
+
+/* Focus visibility for keyboard navigation */
+button:focus-visible, .inventory-slot:focus-visible {
+    outline: 2px solid #d4af37;
+    outline-offset: 2px;
+}
+
+/* High contrast mode support */
+@media (prefers-contrast: high) {
+    .screen {
+        background-color: #000;
+    }
+
+    .stat-value, .nav-btn.active {
+        color: #fff;
+    }
+
+    button {
+        border-width: 3px;
+    }
+}

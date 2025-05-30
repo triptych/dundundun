@@ -477,6 +477,17 @@ const UI = {
         } else {
             this.elements.combatOverlay.classList.remove('active');
 
+            // Clear enemy HP bar content when combat is not active
+            if (this.elements.enemyName) {
+                this.elements.enemyName.textContent = '';
+            }
+            if (this.elements.enemyHpFill) {
+                this.elements.enemyHpFill.style.width = '0%';
+            }
+            if (this.elements.enemyHpText) {
+                this.elements.enemyHpText.textContent = '';
+            }
+
             // Clear focus from all combat buttons to prevent them from "sticking" visually
             const combatButtons = [
                 this.elements.attackBtn,

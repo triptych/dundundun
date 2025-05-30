@@ -370,7 +370,10 @@ const UI = {
 
         // Emit inventory action event
         if (typeof GameState !== 'undefined') {
-            GameState.emit('inventoryAction', { type: 'slotClick', slotIndex });
+            const item = GameState.inventory.items[slotIndex];
+            if (item) {
+                this.showItemActionMenu(item, slotIndex);
+            }
         }
     },
 

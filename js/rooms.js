@@ -69,29 +69,61 @@ const Rooms = {
         const floor = GameState.dungeon.currentFloor;
         const treasureGold = Math.floor(Math.random() * 50) + (floor * 10);
 
-        // Chance for special items
-        const hasSpecialItem = Math.random() < 0.3; // 30% chance
-        let specialItemMessage = '';
+        // Generate items using the Items system
+        let generatedItems = [];
+        let itemsMessage = '';
 
-        if (hasSpecialItem) {
-            const items = ['Health Potion', 'Strength Boost', 'Lucky Charm'];
-            const item = items[Math.floor(Math.random() * items.length)];
-            specialItemMessage = ` and a ${item}`;
+        if (typeof Items !== 'undefined') {
+            generatedItems = Items.generateLoot('treasure_room', floor);
 
-            // Add item to inventory (placeholder for actual item system)
-            console.log(`Found special item: ${item}`);
+            if (generatedItems.length > 0) {
+                let itemsAdded = 0;
+
+                for (const item of generatedItems) {
+                    if (GameState.addItem(item)) {
+                        itemsAdded++;
+                        console.log(`Added item to inventory: ${item.name} x${item.quantity}`);
+                    } else {
+                        console.log(`Inventory full, could not add: ${item.name}`);
+                        if (typeof UI !== 'undefined' && UI.showNotification) {
+                            UI.showNotification('Inventory full! Some items were lost.', 2000, 'warning');
+                        }
+                        break;
+                    }
+                }
+
+                if (itemsAdded > 0) {
+                    const itemNames = generatedItems.slice(0, itemsAdded).map(item =>
+                        item.quantity > 1 ? `${item.name} x${item.quantity}` : item.name
+                    ).join(', ');
+                    itemsMessage = ` and found: ${itemNames}`;
+                }
+            }
+        } else {
+            // Fallback if Items system not available
+            console.warn('Items system not available, using fallback treasure generation');
+
+            // Chance for special items (fallback)
+            const hasSpecialItem = Math.random() < 0.3; // 30% chance
+
+            if (hasSpecialItem) {
+                const items = ['Health Potion', 'Strength Boost', 'Lucky Charm'];
+                const item = items[Math.floor(Math.random() * items.length)];
+                itemsMessage = ` and a ${item}`;
+                console.log(`Found special item: ${item}`);
+            }
         }
 
-        // Award treasure
+        // Award gold
         GameState.updateInventory({ gold: GameState.inventory.gold + treasureGold });
 
         // Mark room as cleared
         GameState.dungeon.currentRoom.isCleared = true;
 
         // Show notification
-        const message = `Found ${treasureGold} gold${specialItemMessage}!`;
+        const message = `Found ${treasureGold} gold${itemsMessage}!`;
         if (typeof UI !== 'undefined' && UI.showNotification) {
-            UI.showNotification(message, 2000, 'success');
+            UI.showNotification(message, 3000, 'success');
         }
 
         console.log(`Treasure room cleared: ${message}`);

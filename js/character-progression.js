@@ -8,13 +8,6 @@ const CharacterProgression = {
     // DOM element references
     elements: {},
 
-    // Temporary attribute point allocation
-    tempAllocations: {
-        strength: 0,
-        agility: 0,
-        vitality: 0
-    },
-
     /**
      * Initialize the character progression system
      */
@@ -85,7 +78,7 @@ const CharacterProgression = {
             this.elements.vitIncrease.addEventListener('click', () => this.allocateAttribute('vitality', 1));
         }
 
-        // Attribute decrease buttons
+        // Attribute decrease buttons (disabled for now)
         if (this.elements.strDecrease) {
             this.elements.strDecrease.addEventListener('click', () => this.allocateAttribute('strength', -1));
         }
@@ -127,6 +120,8 @@ const CharacterProgression = {
      * @param {Object} player - Player data
      */
     updateCharacterUI(player) {
+        console.log('Updating character UI with player data:', player);
+
         // Update level displays
         if (this.elements.headerLevel) {
             this.elements.headerLevel.textContent = player.level;
@@ -148,20 +143,18 @@ const CharacterProgression = {
 
         // Update attribute values
         if (this.elements.playerStrength) {
-            this.elements.playerStrength.textContent = player.strength + this.tempAllocations.strength;
+            this.elements.playerStrength.textContent = player.strength;
         }
         if (this.elements.playerAgility) {
-            this.elements.playerAgility.textContent = player.agility + this.tempAllocations.agility;
+            this.elements.playerAgility.textContent = player.agility;
         }
         if (this.elements.playerVitality) {
-            this.elements.playerVitality.textContent = player.vitality + this.tempAllocations.vitality;
+            this.elements.playerVitality.textContent = player.vitality;
         }
 
         // Update available points
         if (this.elements.availablePoints) {
-            const totalAllocated = Object.values(this.tempAllocations).reduce((sum, val) => sum + val, 0);
-            const remainingPoints = player.availablePoints - totalAllocated;
-            this.elements.availablePoints.textContent = remainingPoints;
+            this.elements.availablePoints.textContent = player.availablePoints;
         }
 
         // Update derived stats
@@ -182,25 +175,20 @@ const CharacterProgression = {
      * @param {Object} player - Player data
      */
     updateDerivedStats(player) {
-        // Calculate derived stats with temporary allocations
-        const tempStr = player.strength + this.tempAllocations.strength;
-        const tempAgi = player.agility + this.tempAllocations.agility;
-        const tempVit = player.vitality + this.tempAllocations.vitality;
-
         // Attack Power (base 10 + strength * 1.5)
-        const attackPower = Math.floor(10 + (tempStr * 1.5));
+        const attackPower = Math.floor(10 + (player.strength * 1.5));
         if (this.elements.attackPower) {
             this.elements.attackPower.textContent = attackPower;
         }
 
         // Critical Chance (base 5% + agility * 0.5%)
-        const critChance = Math.floor(5 + (tempAgi * 0.5));
+        const critChance = Math.floor(5 + (player.agility * 0.5));
         if (this.elements.critChance) {
             this.elements.critChance.textContent = `${critChance}%`;
         }
 
         // Max Health (base 80 + vitality * 4 + level * 5)
-        const maxHealth = Math.floor(80 + (tempVit * 4) + (player.level * 5));
+        const maxHealth = Math.floor(80 + (player.vitality * 4) + (player.level * 5));
         if (this.elements.maxHealth) {
             this.elements.maxHealth.textContent = maxHealth;
         }
@@ -211,10 +199,9 @@ const CharacterProgression = {
      * @param {Object} player - Player data
      */
     updateAttributeButtons(player) {
-        const totalAllocated = Object.values(this.tempAllocations).reduce((sum, val) => sum + val, 0);
-        const remainingPoints = player.availablePoints - totalAllocated;
+        console.log('Updating button states. Available points:', player.availablePoints);
 
-        // Update increase buttons
+        // Update increase buttons - enable if player has available points
         const increaseButtons = [
             this.elements.strIncrease,
             this.elements.agiIncrease,
@@ -223,19 +210,21 @@ const CharacterProgression = {
 
         increaseButtons.forEach(btn => {
             if (btn) {
-                btn.disabled = remainingPoints <= 0;
+                const shouldDisable = player.availablePoints <= 0;
+                btn.disabled = shouldDisable;
+                console.log(`Button ${btn.id} disabled: ${shouldDisable}, available points: ${player.availablePoints}`);
             }
         });
 
-        // Update decrease buttons
+        // Decrease buttons are always disabled for now (no undo functionality)
         if (this.elements.strDecrease) {
-            this.elements.strDecrease.disabled = this.tempAllocations.strength <= 0;
+            this.elements.strDecrease.disabled = true;
         }
         if (this.elements.agiDecrease) {
-            this.elements.agiDecrease.disabled = this.tempAllocations.agility <= 0;
+            this.elements.agiDecrease.disabled = true;
         }
         if (this.elements.vitDecrease) {
-            this.elements.vitDecrease.disabled = this.tempAllocations.vitality <= 0;
+            this.elements.vitDecrease.disabled = true;
         }
     },
 
@@ -245,79 +234,52 @@ const CharacterProgression = {
      * @param {number} amount - Amount to allocate (+1 or -1)
      */
     allocateAttribute(attribute, amount) {
-        if (!GameState || !GameState.player) return;
+        console.log(`Allocating ${amount} point(s) to ${attribute}`);
+
+        if (!GameState || !GameState.player) {
+            console.error('GameState or player not available');
+            return;
+        }
 
         const player = GameState.player;
-        const totalAllocated = Object.values(this.tempAllocations).reduce((sum, val) => sum + val, 0);
-        const remainingPoints = player.availablePoints - totalAllocated;
+        console.log(`Current player state: level ${player.level}, available points: ${player.availablePoints}, ${attribute}: ${player[attribute]}`);
 
         // Check constraints
         if (amount > 0) {
             // Can't allocate more than available points
-            if (remainingPoints <= 0) return;
+            if (player.availablePoints <= 0) {
+                console.log('No available points to allocate');
+                return;
+            }
         } else {
-            // Can't decrease below 0 temp allocation
-            if (this.tempAllocations[attribute] <= 0) return;
+            // For decrease, we don't support undoing allocations yet
+            console.log('Decrease not supported yet');
+            return;
         }
 
-        // Apply allocation
-        this.tempAllocations[attribute] += amount;
+        // Prepare updates
+        const updates = {
+            availablePoints: player.availablePoints - 1
+        };
 
-        // If we have pending allocations, commit them
-        if (amount > 0 && this.getTotalTempAllocations() > 0) {
-            this.commitAttributeAllocations();
-        }
+        updates[attribute] = player[attribute] + 1;
 
-        // Update UI
-        this.updateCharacterUI(player);
-
-        // Add visual feedback
-        this.showAttributeChangeEffect(attribute, amount);
-    },
-
-    /**
-     * Get total temporary allocations
-     * @returns {number} Total temp allocations
-     */
-    getTotalTempAllocations() {
-        return Object.values(this.tempAllocations).reduce((sum, val) => sum + val, 0);
-    },
-
-    /**
-     * Commit temporary attribute allocations to the game state
-     */
-    commitAttributeAllocations() {
-        if (!GameState || !GameState.player) return;
-
-        const player = GameState.player;
-        const updates = {};
-
-        // Apply allocations
-        if (this.tempAllocations.strength > 0) {
-            updates.strength = player.strength + this.tempAllocations.strength;
-        }
-        if (this.tempAllocations.agility > 0) {
-            updates.agility = player.agility + this.tempAllocations.agility;
-        }
-        if (this.tempAllocations.vitality > 0) {
-            updates.vitality = player.vitality + this.tempAllocations.vitality;
-            // Update max health when vitality increases
-            const healthIncrease = this.tempAllocations.vitality * 4;
+        // Update max health if vitality increased
+        if (attribute === 'vitality') {
+            const healthIncrease = 4;
             updates.maxHealth = player.maxHealth + healthIncrease;
             updates.health = Math.min(player.health + healthIncrease, updates.maxHealth);
         }
 
-        // Deduct available points
-        const totalUsed = this.getTotalTempAllocations();
-        updates.availablePoints = player.availablePoints - totalUsed;
+        console.log('Applying updates:', updates);
 
         // Apply updates to game state
         GameState.updatePlayer(updates);
 
-        // Reset temporary allocations
-        this.tempAllocations = { strength: 0, agility: 0, vitality: 0 };
+        // Add visual feedback
+        this.showAttributeChangeEffect(attribute, amount);
 
-        console.log('Attribute allocations committed:', updates);
+        console.log(`Successfully allocated 1 point to ${attribute}. Remaining points: ${updates.availablePoints}`);
     },
 
     /**
@@ -471,6 +433,18 @@ progressionStyles.textContent = `
         100% {
             transform: scale(1);
         }
+    }
+
+    .attribute-btn:disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
+        pointer-events: none;
+    }
+
+    .attribute-btn:not(:disabled) {
+        opacity: 1;
+        cursor: pointer;
+        pointer-events: auto;
     }
 `;
 document.head.appendChild(progressionStyles);

@@ -48,7 +48,7 @@
 ### 6. Character Progression System
 - [x] Implement experience point tracking
 - [x] Create level-up mechanics
-- [ ] Design attribute point distribution (Strength, Agility, Vitality)
+- [x] Design attribute point distribution (Strength, Agility, Vitality)
 - [ ] Build character stat calculations
 - [ ] Add level-up visual feedback
 - [ ] Create character progression UI

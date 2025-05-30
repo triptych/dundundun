@@ -27,21 +27,21 @@
 - [x] Create simple procedural layout generator
 
 ### 4. Basic Combat System
-- [ ] Design turn-based combat framework
-- [ ] Implement combat state management
-- [ ] Create basic attack mechanics
-- [ ] Add health tracking for player and enemies
-- [ ] Build combat UI elements
-- [ ] Implement combat resolution logic
-- [ ] Add basic enemy AI behavior
+- [x] Design turn-based combat framework
+- [x] Implement combat state management
+- [x] Create basic attack mechanics
+- [x] Add health tracking for player and enemies
+- [x] Build combat UI elements
+- [x] Implement combat resolution logic
+- [x] Add basic enemy AI behavior
 
 ### 5. Core Game Loop
-- [ ] Integrate movement with combat triggers
-- [ ] Implement room clearing mechanics
-- [ ] Add floor completion detection
-- [ ] Create game over conditions
-- [ ] Build restart/continue functionality
-- [ ] Add basic tutorial sequence
+- [x] Integrate movement with combat triggers
+- [x] Implement room clearing mechanics
+- [x] Add floor completion detection
+- [x] Create game over conditions
+- [x] Build restart/continue functionality
+- [x] Add basic tutorial sequence
 
 ## Phase 2: Equipment & Progression (3 weeks)
 

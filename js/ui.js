@@ -476,6 +476,20 @@ const UI = {
             }
         } else {
             this.elements.combatOverlay.classList.remove('active');
+
+            // Clear focus from all combat buttons to prevent them from "sticking" visually
+            const combatButtons = [
+                this.elements.attackBtn,
+                this.elements.heavyAttackBtn,
+                this.elements.blockBtn,
+                this.elements.itemBtn
+            ];
+
+            combatButtons.forEach(button => {
+                if (button && document.activeElement === button) {
+                    button.blur();
+                }
+            });
         }
     },
 

@@ -368,12 +368,158 @@ const UI = {
     handleInventorySlotClick(slotIndex) {
         console.log('Inventory slot clicked:', slotIndex);
 
-        // Emit inventory action event
         if (typeof GameState !== 'undefined') {
             const item = GameState.inventory.items[slotIndex];
             if (item) {
                 this.showItemActionMenu(item, slotIndex);
             }
+        }
+    },
+
+    /**
+     * Show item action menu
+     * @param {Object} item - Item to show actions for
+     * @param {number} slotIndex - Inventory slot index
+     */
+    showItemActionMenu(item, slotIndex) {
+        this.hideItemActionMenu();
+
+        const menu = document.createElement('div');
+        menu.id = 'item-action-menu';
+        menu.innerHTML = `
+            <div class="item-info">
+                <div class="item-name" style="color: ${typeof Items !== 'undefined' ? Items.getRarityColor(item.rarity) : '#fff'};">
+                    ${item.icon} ${item.name}
+                </div>
+                <div class="item-description">${item.description}</div>
+                ${item.quantity > 1 ? `<div class="item-quantity">Quantity: ${item.quantity}</div>` : ''}
+            </div>
+            <div class="item-actions">
+                ${(item.type === 'consumable' || item.type === 'weapon' || item.type === 'armor' || item.type === 'accessory') ?
+                    `<button class="action-btn use-btn">${item.type === 'consumable' ? 'Use' : 'Equip'}</button>` : ''}
+                <button class="action-btn drop-btn">Drop</button>
+                <button class="action-btn cancel-btn">Cancel</button>
+            </div>
+        `;
+
+        menu.style.cssText = `
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: linear-gradient(135deg, #2a2a2a 0%, #1a1a1a 100%);
+            border: 2px solid #555;
+            border-radius: 12px;
+            padding: 1rem;
+            z-index: 10000;
+            min-width: 250px;
+            color: #e0e0e0;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
+        `;
+
+        document.body.appendChild(menu);
+
+        // Add event listeners
+        const useBtn = menu.querySelector('.use-btn');
+        if (useBtn) {
+            useBtn.addEventListener('click', () => {
+                this.useItem(item, slotIndex);
+                this.hideItemActionMenu();
+            });
+        }
+
+        menu.querySelector('.drop-btn').addEventListener('click', () => {
+            this.dropItem(slotIndex);
+            this.hideItemActionMenu();
+        });
+
+        menu.querySelector('.cancel-btn').addEventListener('click', () => {
+            this.hideItemActionMenu();
+        });
+
+        // Style the menu content
+        const itemInfo = menu.querySelector('.item-info');
+        if (itemInfo) {
+            itemInfo.style.cssText = `
+                margin-bottom: 1rem;
+                padding-bottom: 1rem;
+                border-bottom: 1px solid #444;
+            `;
+        }
+
+        const itemActions = menu.querySelector('.item-actions');
+        if (itemActions) {
+            itemActions.style.cssText = `
+                display: flex;
+                gap: 0.5rem;
+                flex-wrap: wrap;
+            `;
+
+            const actionBtns = itemActions.querySelectorAll('.action-btn');
+            actionBtns.forEach(btn => {
+                btn.style.cssText = `
+                    flex: 1;
+                    min-width: 60px;
+                    padding: 0.5rem;
+                    border: 1px solid #666;
+                    border-radius: 6px;
+                    background: #333;
+                    color: #fff;
+                    cursor: pointer;
+                    font-size: 0.9rem;
+                    transition: all 0.2s ease;
+                `;
+            });
+        }
+
+        setTimeout(() => {
+            document.addEventListener('click', this.handleOutsideMenuClick.bind(this), { once: true });
+        }, 100);
+    },
+
+    /**
+     * Handle clicks outside the item menu
+     */
+    handleOutsideMenuClick(event) {
+        const menu = document.getElementById('item-action-menu');
+        if (menu && !menu.contains(event.target)) {
+            this.hideItemActionMenu();
+        }
+    },
+
+    /**
+     * Hide item action menu
+     */
+    hideItemActionMenu() {
+        const menu = document.getElementById('item-action-menu');
+        if (menu) {
+            document.body.removeChild(menu);
+        }
+    },
+
+    /**
+     * Use an item
+     * @param {Object} item - Item to use
+     * @param {number} slotIndex - Inventory slot index
+     */
+    useItem(item, slotIndex) {
+        if (typeof Items !== 'undefined') {
+            Items.useItem(item, slotIndex);
+        } else {
+            console.warn('Items system not available');
+        }
+    },
+
+    /**
+     * Drop an item
+     * @param {number} slotIndex - Inventory slot index
+     */
+    dropItem(slotIndex) {
+        if (typeof Items !== 'undefined') {
+            Items.dropItem(slotIndex);
+        } else {
+            GameState.removeItem(slotIndex);
+            this.showNotification('Item dropped', 1500, 'info');
         }
     },
 
@@ -443,11 +589,25 @@ const UI = {
 
             if (item) {
                 slot.classList.add('occupied');
-                slot.title = item.name || 'Item';
-                // Here you would add item icon/image
+                slot.title = typeof Items !== 'undefined' ? Items.getTooltip(item) : (item.name || 'Item');
+
+                // Add item icon and quantity
+                slot.innerHTML = `
+                    <div class="item-icon">${item.icon || '📦'}</div>
+                    ${item.quantity > 1 ? `<div class="item-quantity">${item.quantity}</div>` : ''}
+                `;
+
+                // Set rarity border color
+                if (typeof Items !== 'undefined' && item.rarity) {
+                    slot.style.borderColor = Items.getRarityColor(item.rarity);
+                } else {
+                    slot.style.borderColor = '#555';
+                }
             } else {
                 slot.classList.remove('occupied');
                 slot.title = '';
+                slot.innerHTML = '';
+                slot.style.borderColor = '#333';
             }
         });
     },
@@ -738,46 +898,37 @@ const UI = {
         `;
 
         const dialogContent = document.createElement('div');
-        dialogContent.className = 'confirmation-content';
         dialogContent.style.cssText = `
             background: linear-gradient(135deg, #2a2a2a 0%, #1a1a1a 100%);
-            border: 2px solid #444;
-            border-radius: 16px;
+            border: 2px solid #d4af37;
+            border-radius: 12px;
             padding: 2rem;
-            max-width: 90%;
-            width: 100%;
-            max-width: 350px;
             text-align: center;
-            animation: slideIn 0.3s ease;
+            color: #e0e0e0;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
+            max-width: 400px;
         `;
 
         dialogContent.innerHTML = `
-            <h3 style="color: #d4af37; margin-bottom: 1rem; font-size: 1.25rem;">Start New Game?</h3>
-            <p style="color: #e0e0e0; margin-bottom: 2rem; line-height: 1.4;">
-                Are you sure you want to start a new game? This will reset all your progress and cannot be undone.
-            </p>
-            <div style="display: flex; gap: 1rem;">
+            <h2 style="margin: 0 0 1rem 0; color: #d4af37;">Start New Game?</h2>
+            <p style="margin: 0 0 2rem 0; line-height: 1.4;">This will overwrite your current save data. Are you sure you want to continue?</p>
+            <div style="display: flex; gap: 1rem; justify-content: center;">
                 <button id="confirm-new-game" style="
-                    flex: 1;
-                    background: linear-gradient(135deg, #cc3333 0%, #aa2222 100%);
-                    border: 2px solid #ff4444;
-                    color: #ffffff;
-                    padding: 0.75rem;
-                    border-radius: 10px;
-                    font-size: 0.9rem;
+                    padding: 0.75rem 1.5rem;
+                    border: 1px solid #d4af37;
+                    border-radius: 6px;
+                    background: #d4af37;
+                    color: #1a1a1a;
                     font-weight: bold;
                     cursor: pointer;
                     transition: all 0.2s ease;
                 ">Yes, Start New Game</button>
                 <button id="cancel-new-game" style="
-                    flex: 1;
-                    background: linear-gradient(135deg, #3a3a3a 0%, #2a2a2a 100%);
-                    border: 2px solid #555;
-                    color: #e0e0e0;
-                    padding: 0.75rem;
-                    border-radius: 10px;
-                    font-size: 0.9rem;
-                    font-weight: bold;
+                    padding: 0.75rem 1.5rem;
+                    border: 1px solid #666;
+                    border-radius: 6px;
+                    background: #333;
+                    color: #fff;
                     cursor: pointer;
                     transition: all 0.2s ease;
                 ">Cancel</button>
@@ -787,36 +938,19 @@ const UI = {
         confirmDialog.appendChild(dialogContent);
         document.body.appendChild(confirmDialog);
 
-        // Add hover effects
+        // Add event listeners
         const confirmBtn = confirmDialog.querySelector('#confirm-new-game');
         const cancelBtn = confirmDialog.querySelector('#cancel-new-game');
 
-        confirmBtn.addEventListener('mouseenter', () => {
-            confirmBtn.style.transform = 'translateY(-2px)';
-            confirmBtn.style.boxShadow = '0 4px 8px rgba(255, 68, 68, 0.3)';
-        });
-        confirmBtn.addEventListener('mouseleave', () => {
-            confirmBtn.style.transform = 'translateY(0)';
-            confirmBtn.style.boxShadow = 'none';
-        });
-
-        cancelBtn.addEventListener('mouseenter', () => {
-            cancelBtn.style.borderColor = '#d4af37';
-            cancelBtn.style.background = 'linear-gradient(135deg, #4a4a3a 0%, #3a3a2a 100%)';
-            cancelBtn.style.transform = 'translateY(-2px)';
-            cancelBtn.style.boxShadow = '0 4px 8px rgba(212, 175, 55, 0.2)';
-        });
-        cancelBtn.addEventListener('mouseleave', () => {
-            cancelBtn.style.borderColor = '#555';
-            cancelBtn.style.background = 'linear-gradient(135deg, #3a3a3a 0%, #2a2a2a 100%)';
-            cancelBtn.style.transform = 'translateY(0)';
-            cancelBtn.style.boxShadow = 'none';
-        });
-
-        // Handle button clicks
         confirmBtn.addEventListener('click', () => {
-            this.confirmNewGame();
+            if (typeof Game !== 'undefined' && Game.newGame) {
+                Game.newGame();
+            } else if (typeof GameState !== 'undefined') {
+                GameState.reset();
+                GameState.emit('stateChange', { type: 'newGame' });
+            }
             document.body.removeChild(confirmDialog);
+            this.closeMenu();
         });
 
         cancelBtn.addEventListener('click', () => {
@@ -829,96 +963,13 @@ const UI = {
                 document.body.removeChild(confirmDialog);
             }
         });
-    },
-
-    /**
-     * Confirm and start new game
-     */
-    confirmNewGame() {
-        if (typeof GameState !== 'undefined') {
-            GameState.newGame();
-            this.showNotification('New game started!', 2000, 'success');
-        }
-        this.closeMenu();
     }
 };
-
-// Add CSS for notifications and save indicators
-const notificationStyles = document.createElement('style');
-notificationStyles.textContent = `
-    @keyframes slideDown {
-        from {
-            opacity: 0;
-            transform: translateX(-50%) translateY(-20px);
-        }
-        to {
-            opacity: 1;
-            transform: translateX(-50%) translateY(0);
-        }
-    }
-
-    @keyframes slideUp {
-        from {
-            opacity: 1;
-            transform: translateX(-50%) translateY(0);
-        }
-        to {
-            opacity: 0;
-            transform: translateX(-50%) translateY(-20px);
-        }
-    }
-
-    @keyframes saveIndicatorFade {
-        0% {
-            opacity: 0;
-            transform: translateX(20px);
-        }
-        20% {
-            opacity: 1;
-            transform: translateX(0);
-        }
-        80% {
-            opacity: 1;
-            transform: translateX(0);
-        }
-        100% {
-            opacity: 0;
-            transform: translateX(20px);
-        }
-    }
-
-    .touching {
-        transform: scale(0.95) !important;
-        transition: transform 0.1s ease !important;
-    }
-
-    .save-icon {
-        margin-right: 0.25rem;
-    }
-
-    @keyframes fadeIn {
-        from {
-            opacity: 0;
-        }
-        to {
-            opacity: 1;
-        }
-    }
-
-    @keyframes slideIn {
-        from {
-            opacity: 0;
-            transform: scale(0.9) translateY(-20px);
-        }
-        to {
-            opacity: 1;
-            transform: scale(1) translateY(0);
-        }
-    }
-`;
-document.head.appendChild(notificationStyles);
 
 // Export for use in other modules
 if (typeof module !== 'undefined' && module.exports) {
     module.exports = UI;
-}
+} else if (typeof window !== 'undefined') {
+    window.UI = UI;
+}Content.className = 'confirmation-content';
+        dialog

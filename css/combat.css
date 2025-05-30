@@ -109,3 +109,8 @@
 .log-entry:last-child {
     margin-bottom: 0;
 }
+
+/* Hide health bar when combat overlay is not active */
+#combat-overlay:not(.active) .enemy-hp-bar {
+    display: none;
+}

@@ -26,14 +26,44 @@
     cursor: pointer;
     transition: all 0.2s ease;
     min-height: 60px;
+    z-index: 1;
 }
 
 .inventory-slot:hover {
     border-color: #666;
     background: linear-gradient(135deg, #3a3a3a 0%, #2e2e2e 100%);
+    z-index: 2;
 }
 
 .inventory-slot.occupied {
     border-color: #d4af37;
     background: linear-gradient(135deg, #3a3520 0%, #2e2a1e 100%);
+    z-index: 2;
+}
+
+.inventory-slot.occupied:hover {
+    z-index: 3;
+}
+
+/* Item content styles */
+.inventory-slot .item-icon {
+    font-size: 1.5rem;
+    z-index: inherit;
+}
+
+.inventory-slot .item-quantity {
+    position: absolute;
+    bottom: 2px;
+    right: 2px;
+    background: rgba(0, 0, 0, 0.8);
+    color: #d4af37;
+    border-radius: 50%;
+    width: 18px;
+    height: 18px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.7rem;
+    font-weight: bold;
+    z-index: inherit;
 }

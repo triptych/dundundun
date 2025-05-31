@@ -1,4 +1,4 @@
-// Pocket Dungeon - Utility Functions
+// Dun Dun Dungeon - Utility Functions
 // Common utility functions used throughout the game
 
 /**

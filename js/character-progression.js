@@ -1,4 +1,4 @@
-// Pocket Dungeon - Character Progression System
+// Dun Dun Dungeon - Character Progression System
 // Handles experience, leveling, and attribute point allocation
 
 /**

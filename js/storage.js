@@ -1,4 +1,4 @@
-// Pocket Dungeon - Local Storage Management
+// Dun Dun Dungeon - Local Storage Management
 // Handles saving and loading game data to/from browser localStorage
 
 /**

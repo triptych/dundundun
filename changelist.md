@@ -1,4 +1,4 @@
-# Pocket Dungeon - Development Changelog
+# Dun Dun Dungeon - Development Changelog
 
 ## Project Initialization - Initial HTML Structure
 
@@ -9,7 +9,7 @@
 
 #### 1. Created index.html
 - **File:** `index.html`
-- **Description:** Complete HTML structure for the Pocket Dungeon mobile game
+- **Description:** Complete HTML structure for the Dun Dun Dungeon mobile game
 - **Key Features Implemented:**
   - Mobile-first responsive meta tags with viewport settings
   - PWA-ready configuration (manifest, theme-color, app-capable)

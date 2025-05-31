@@ -1,4 +1,4 @@
-# Pocket Dungeon - Development Task List
+# Dun Dun Dungeon - Development Task List
 
 ## Phase 1: Core Gameplay Loop (4 weeks)
 
@@ -250,4 +250,4 @@
 **Minimum Device Support**: 3+ years old mobile devices
 **Primary Platform**: Mobile web browsers (iOS Safari, Android Chrome)
 
-This task list provides a comprehensive roadmap for developing Pocket Dungeon according to the specifications outlined in the design document. Tasks are organized by development phase and priority, with clear deliverables and success criteria for each milestone.
+This task list provides a comprehensive roadmap for developing Dun Dun Dungeon according to the specifications outlined in the design document. Tasks are organized by development phase and priority, with clear deliverables and success criteria for each milestone.

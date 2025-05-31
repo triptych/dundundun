@@ -1,4 +1,4 @@
-// Pocket Dungeon - Main Game Controller
+// Dun Dun Dungeon - Main Game Controller
 // Entry point and main game loop management
 
 
@@ -20,7 +20,7 @@ const Game = {
      * Initialize the game
      */
     async init() {
-        console.log('Initializing Pocket Dungeon...');
+        console.log('Initializing Dun Dun Dungeon...');
 
         try {
             // Initialize canvas using Rendering module

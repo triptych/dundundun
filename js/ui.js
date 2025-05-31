@@ -1,4 +1,4 @@
-// Pocket Dungeon - User Interface Management
+// Dun Dun Dungeon - User Interface Management
 // Handles all UI interactions and updates
 
 /**
@@ -183,6 +183,132 @@ const UI = {
 
         // Touch and click optimizations
         this.setupTouchOptimizations();
+    },
+
+    /**
+     * Set up touch-specific optimizations
+     */
+    /**
+     * Set up equipment slot event listeners
+     */
+    setupEquipmentListeners() {
+        // Equipment slot click handlers
+        const equipmentSlots = document.querySelectorAll('.equipment-slot');
+        equipmentSlots.forEach(slot => {
+            slot.addEventListener('click', (e) => {
+                const slotType = slot.dataset.slot;
+                this.handleEquipmentSlotClick(slotType);
+            });
+        });
+    },
+
+    /**
+     * Handle equipment slot clicks
+     * @param {string} slotType - Type of equipment slot (weapon, armor, accessory)
+     */
+    handleEquipmentSlotClick(slotType) {
+        if (typeof GameState !== 'undefined' && GameState.player.equipment[slotType]) {
+            const equippedItem = GameState.player.equipment[slotType];
+            this.showEquipmentActionMenu(equippedItem, slotType);
+        }
+    },
+
+    /**
+     * Show equipment action menu for equipped items
+     * @param {Object} item - Equipped item
+     * @param {string} slotType - Equipment slot type
+     */
+    showEquipmentActionMenu(item, slotType) {
+        this.hideItemActionMenu();
+
+        const menu = document.createElement('div');
+        menu.id = 'item-action-menu';
+        menu.innerHTML = `
+            <div class="item-info">
+                <div class="item-name" style="color: ${typeof Items !== 'undefined' ? Items.getRarityColor(item.rarity) : '#fff'};">
+                    ${item.icon} ${item.name}
+                </div>
+                <div class="item-description">${item.description}</div>
+                <div class="item-equipped">Currently Equipped</div>
+            </div>
+            <div class="item-actions">
+                <button class="action-btn unequip-btn">Unequip</button>
+                <button class="action-btn cancel-btn">Cancel</button>
+            </div>
+        `;
+
+        menu.style.cssText = `
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: linear-gradient(135deg, #2a2a2a 0%, #1a1a1a 100%);
+            border: 2px solid #555;
+            border-radius: 12px;
+            padding: 1rem;
+            z-index: 10000;
+            min-width: 250px;
+            color: #e0e0e0;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
+        `;
+
+        document.body.appendChild(menu);
+
+        // Add event listeners
+        menu.querySelector('.unequip-btn').addEventListener('click', () => {
+            this.unequipItem(slotType);
+            this.hideItemActionMenu();
+        });
+
+        menu.querySelector('.cancel-btn').addEventListener('click', () => {
+            this.hideItemActionMenu();
+        });
+
+        setTimeout(() => {
+            document.addEventListener('click', this.handleOutsideMenuClick.bind(this), { once: true });
+        }, 100);
+    },
+
+    /**
+     * Unequip an item
+     * @param {string} slotType - Equipment slot type
+     */
+    unequipItem(slotType) {
+        if (typeof GameState !== 'undefined' && GameState.player.equipment[slotType]) {
+            const equippedItem = GameState.player.equipment[slotType];
+
+            // Check if inventory has space
+            if (GameState.inventory.items.length >= GameState.inventory.maxSlots) {
+                this.showNotification('Inventory full! Cannot unequip item', 2000, 'error');
+                return;
+            }
+
+            // Remove stat bonuses
+            if (equippedItem.stats) {
+                const updates = {};
+                for (const [stat, value] of Object.entries(equippedItem.stats)) {
+                    if (stat === 'maxHealth') {
+                        updates.maxHealth = GameState.player.maxHealth - value;
+                        // Adjust current health if it exceeds new max
+                        updates.health = Math.min(GameState.player.health, updates.maxHealth);
+                    } else if (GameState.player.hasOwnProperty(stat)) {
+                        updates[stat] = GameState.player[stat] - value;
+                    }
+                }
+                if (Object.keys(updates).length > 0) {
+                    GameState.updatePlayer(updates);
+                }
+            }
+
+            // Add to inventory
+            GameState.addItem({ ...equippedItem });
+
+            // Remove from equipment
+            GameState.player.equipment[slotType] = null;
+            GameState.emit('playerUpdate', GameState.player);
+
+            this.showNotification(`Unequipped ${equippedItem.name}`, 1500, 'info');
+        }
     },
 
     /**

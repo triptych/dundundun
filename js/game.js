@@ -99,7 +99,7 @@ const Game = {
      * Set up event listeners between game systems
      */
     setupSystemEvents() {
-        if (typeof GameState === 'undefined') return;
+        if (!GameState) return;
 
         // Listen for movement commands from UI
         GameState.on('movement', (data) => this.handleMovement(data));

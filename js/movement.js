@@ -10,6 +10,12 @@ const Movement = {
         const { direction } = data;
         console.log(`Movement.handleMovement called with direction: ${direction}`);
 
+        // Don't process movement if transitioning between levels
+        if (GameState.current && GameState.current.isTransitioningLevel) {
+            console.log('Movement blocked: level transition in progress');
+            return false;
+        }
+
         // Don't process movement if in combat
         if (GameState.combat.isActive) {
             console.log('Movement blocked: combat is active');

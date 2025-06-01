@@ -1,0 +1,16 @@
+/* Navigation Fix - Hide action panel when other tabs are active */
+
+/* Hide action panel when any panel is active */
+.panel.active ~ .game-main .action-panel {
+    display: none !important;
+}
+
+/* Alternative approach for better browser compatibility */
+body:has(.panel.active) .action-panel {
+    display: none !important;
+}
+
+/* Fallback for browsers that don't support :has() */
+.hide-action-panel .action-panel {
+    display: none !important;
+}

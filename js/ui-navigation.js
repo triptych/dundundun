@@ -78,6 +78,9 @@ const UINavigation = {
         const panels = document.querySelectorAll('.panel');
         panels.forEach(panel => panel.classList.remove('active'));
 
+        // Get action panel element
+        const actionPanel = document.querySelector('.action-panel');
+
         // Show target panel if not game tab
         if (tabName !== 'game') {
             const targetPanel = document.getElementById(`${tabName}-panel`);
@@ -85,8 +88,16 @@ const UINavigation = {
                 targetPanel.classList.add('active');
                 UICore.activePanel = tabName;
             }
+            // Hide action panel when other tabs are active
+            if (actionPanel) {
+                actionPanel.style.display = 'none';
+            }
         } else {
             UICore.activePanel = null;
+            // Show action panel when game tab is active
+            if (actionPanel) {
+                actionPanel.style.display = 'block';
+            }
         }
     },
 

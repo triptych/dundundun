@@ -246,8 +246,8 @@ const UINavigation = {
             if (typeof Game !== 'undefined' && Game.newGame) {
                 Game.newGame();
             } else if (typeof GameState !== 'undefined') {
-                GameState.reset();
-                GameState.emit('stateChange', { type: 'newGame' });
+                GameState.newGame();
+
             }
             document.body.removeChild(confirmDialog);
             this.closeMenu();

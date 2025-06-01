@@ -62,10 +62,13 @@ const EquipmentIntegration = {
     updateEquipmentSlot(slotElement, item, emptyIcon, emptyTooltip) {
         if (item) {
             const rarityColor = typeof Items !== 'undefined' ? Items.getRarityColor(item.rarity) : '#fff';
+            const weaponType = this.getWeaponType(item);
+
             slotElement.innerHTML = `
                 <div class="equipped-item" style="color: ${rarityColor};">
                     <div class="item-icon">${item.icon}</div>
                     <div class="item-name">${item.name}</div>
+                    ${weaponType ? `<div class="item-type">${weaponType}</div>` : ''}
                 </div>
             `;
             slotElement.title = typeof Items !== 'undefined' ? Items.getTooltip(item) : item.name;
@@ -73,6 +76,45 @@ const EquipmentIntegration = {
             slotElement.innerHTML = `<div class="empty-slot">${emptyIcon}</div>`;
             slotElement.title = emptyTooltip;
         }
+    },
+
+    /**
+     * Extract weapon type from item name or description
+     * @param {Object} item - The item to analyze
+     * @returns {string} Weapon type or empty string
+     */
+    getWeaponType(item) {
+        if (!item || item.type !== 'weapon') return '';
+
+        const name = item.name.toLowerCase();
+        const description = (item.description || '').toLowerCase();
+
+        // Extract weapon type from name
+        if (name.includes('sword')) return 'Sword';
+        if (name.includes('blade')) return 'Blade';
+        if (name.includes('axe')) return 'Axe';
+        if (name.includes('mace')) return 'Mace';
+        if (name.includes('hammer')) return 'Hammer';
+        if (name.includes('dagger')) return 'Dagger';
+        if (name.includes('spear')) return 'Spear';
+        if (name.includes('bow')) return 'Bow';
+        if (name.includes('staff')) return 'Staff';
+        if (name.includes('wand')) return 'Wand';
+
+        // Check description as fallback
+        if (description.includes('sword')) return 'Sword';
+        if (description.includes('blade')) return 'Blade';
+        if (description.includes('axe')) return 'Axe';
+        if (description.includes('mace')) return 'Mace';
+        if (description.includes('hammer')) return 'Hammer';
+        if (description.includes('dagger')) return 'Dagger';
+        if (description.includes('spear')) return 'Spear';
+        if (description.includes('bow')) return 'Bow';
+        if (description.includes('staff')) return 'Staff';
+        if (description.includes('wand')) return 'Wand';
+
+        // Default for weapons without specific type
+        return 'Weapon';
     },
 
     /**

@@ -150,6 +150,12 @@ const Rooms = {
     handleStairsRoom(onFloorAdvance = null) {
         console.log('Found stairs to next floor');
 
+        // Set level transition flag to disable movement
+        if (typeof GameState !== 'undefined') {
+            GameState.current.isTransitioningLevel = true;
+            console.log('Level transition flag set to true - movement disabled');
+        }
+
         // Show option to advance to next floor
         if (typeof UI !== 'undefined' && UI.showNotification) {
             UI.showNotification('Stairs to next floor found! (Auto-advancing in 2 seconds)', 3000, 'info');
@@ -224,6 +230,12 @@ const Rooms = {
         // Generate new floor
         GameState.generateNewFloor(nextFloor);
         GameState.updatePlayer({ floor: nextFloor });
+
+        // Clear level transition flag to re-enable movement
+        if (typeof GameState !== 'undefined') {
+            GameState.current.isTransitioningLevel = false;
+            console.log('Level transition flag cleared - movement re-enabled');
+        }
 
         // Show notification
         if (typeof UI !== 'undefined' && UI.showNotification) {

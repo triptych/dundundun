@@ -874,6 +874,7 @@ const GameState = {
         // Set game as active
         this.current.isGameActive = true;
         this.current.screen = 'game';
+        this.current.isTransitioningLevel = false; // Ensure movement is enabled for new game
 
         this.emit('stateChange', { type: 'newGame', state: this.current });
         this.emit('playerUpdate', this.player);

@@ -1,0 +1,11 @@
+/* Character Panel Scrolling Fix */
+.character-content {
+    flex: 1 !important;
+    overflow-y: auto !important;
+    padding: 0 !important;
+}
+
+#character-panel .character-content {
+    height: 100% !important;
+    max-height: calc(100vh - 150px) !important;
+}

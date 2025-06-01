@@ -1,5 +1,12 @@
 /* Character Stats & Progression */
 
+/* Character Panel Content */
+.character-content {
+    flex: 1;
+    overflow-y: auto;
+    padding: 0;
+}
+
 .character-stats {
     padding: 1rem;
     flex: 1;

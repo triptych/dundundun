@@ -49,25 +49,25 @@
 - [x] Implement experience point tracking
 - [x] Create level-up mechanics
 - [x] Design attribute point distribution (Strength, Agility, Vitality)
-- [ ] Build character stat calculations
-- [ ] Add level-up visual feedback
-- [ ] Create character progression UI
+- [x] Build character stat calculations
+- [x] Add level-up visual feedback
+- [x] Create character progression UI
 
 ### 7. Equipment System Foundation
-- [ ] Design equipment data structure
-- [ ] Create weapon types (Swords, Axes, Bows, Staves)
-- [ ] Implement armor types (Light, Medium, Heavy)
-- [ ] Add accessory system (Rings, Amulets)
-- [ ] Build equipment stat calculations
-- [ ] Create equipment comparison system
+- [x] Design equipment data structure
+- [x] Create weapon types (Swords, Axes, Bows, Staves)
+- [x] Implement armor types (Light, Medium, Heavy)
+- [x] Add accessory system (Rings, Amulets)
+- [x] Build equipment stat calculations
+- [x] Create equipment comparison system
 
 ### 8. Loot & Rewards System
-- [ ] Design loot table system
-- [ ] Implement rarity tiers (Common, Rare, Epic, Legendary)
-- [ ] Create treasure room loot generation
-- [ ] Add monster drop mechanics
-- [ ] Build loot distribution algorithms
-- [ ] Implement equipment upgrade system
+- [x] Design loot table system
+- [x] Implement rarity tiers (Common, Rare, Epic, Legendary)
+- [x] Create treasure room loot generation
+- [x] Add monster drop mechanics
+- [x] Build loot distribution algorithms
+- [x] Implement equipment upgrade system
 
 ### 9. Inventory Management
 - [ ] Create 20-slot inventory system

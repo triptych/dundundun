@@ -31,6 +31,9 @@ const UICombat = {
         if (UICore.elements.itemBtn) {
             UICore.elements.itemBtn.addEventListener('click', () => this.handleCombatAction('item'));
         }
+        if (UICore.elements.escapeBtn) {
+            UICore.elements.escapeBtn.addEventListener('click', () => this.handleCombatAction('escape'));
+        }
 
         // Subscribe to combat updates
         if (typeof GameState !== 'undefined') {
@@ -144,7 +147,8 @@ const UICombat = {
                 UICore.elements.attackBtn,
                 UICore.elements.heavyAttackBtn,
                 UICore.elements.blockBtn,
-                UICore.elements.itemBtn
+                UICore.elements.itemBtn,
+                UICore.elements.escapeBtn
             ];
 
             combatButtons.forEach(button => {

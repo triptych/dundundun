@@ -1,5 +1,8 @@
 // Item System - Defines items, their properties, and interactions
 const Items = {
+    // Load equipment database from EquipmentSystem if available
+    equipmentDatabase: typeof EquipmentSystem !== 'undefined' ? EquipmentSystem.equipmentDatabase : {},
+
     // Item type definitions
     types: {
         CONSUMABLE: 'consumable',
@@ -214,34 +217,103 @@ const Items = {
     lootTables: {
         treasure_room: {
             common: [
-                { id: 'health_potion', weight: 30 },
-                { id: 'gold_coin', weight: 40, quantityMin: 10, quantityMax: 50 },
-                { id: 'leather_armor', weight: 15 },
-                { id: 'iron_sword', weight: 15 }
+                { id: 'health_potion', weight: 20 },
+                { id: 'gold_coin', weight: 30, quantityMin: 10, quantityMax: 50 },
+                // Weapons
+                { id: 'rusty_sword', weight: 10 },
+                { id: 'wooden_axe', weight: 8 },
+                { id: 'hunting_bow', weight: 8 },
+                { id: 'apprentice_staff', weight: 6 },
+                // Armor
+                { id: 'cloth_armor', weight: 10 },
+                { id: 'leather_vest', weight: 8 },
+                // Accessories
+                { id: 'copper_ring', weight: 5 },
+                { id: 'health_amulet', weight: 5 }
             ],
             uncommon: [
-                { id: 'health_potion_greater', weight: 25 },
-                { id: 'strength_boost', weight: 20 },
-                { id: 'agility_boost', weight: 20 },
-                { id: 'steel_sword', weight: 15 },
-                { id: 'chainmail', weight: 10 },
-                { id: 'lucky_charm', weight: 10 }
+                { id: 'health_potion_greater', weight: 15 },
+                { id: 'strength_boost', weight: 10 },
+                { id: 'agility_boost', weight: 10 },
+                // Weapons
+                { id: 'iron_sword', weight: 8 },
+                { id: 'battle_axe', weight: 7 },
+                { id: 'longbow', weight: 7 },
+                { id: 'silver_blade', weight: 6 },
+                // Armor
+                { id: 'chainmail_shirt', weight: 8 },
+                { id: 'scale_armor', weight: 7 },
+                { id: 'ranger_garb', weight: 6 },
+                // Accessories
+                { id: 'silver_ring', weight: 8 },
+                { id: 'protection_amulet', weight: 7 },
+                { id: 'lucky_charm', weight: 6 }
             ],
             rare: [
-                { id: 'enchanted_blade', weight: 30 },
-                { id: 'ring_of_strength', weight: 25 },
-                { id: 'gem_ruby', weight: 45 }
+                { id: 'gem_ruby', weight: 20 },
+                // Weapons
+                { id: 'berserker_axe', weight: 12 },
+                { id: 'elven_bow', weight: 12 },
+                { id: 'arcane_staff', weight: 10 },
+                { id: 'enchanted_blade', weight: 10 },
+                // Armor
+                { id: 'dragon_scale', weight: 10 },
+                { id: 'steel_plate', weight: 8 },
+                // Accessories
+                { id: 'golden_ring', weight: 10 },
+                { id: 'ring_of_strength', weight: 8 }
+            ],
+            epic: [
+                // Armor
+                { id: 'titan_armor', weight: 30 },
+                // Accessories
+                { id: 'divine_amulet', weight: 30 },
+                // Treasures
+                { id: 'gem_ruby', weight: 40, quantityMin: 2, quantityMax: 5 }
             ]
         },
         monster_drop: {
             common: [
-                { id: 'health_potion', weight: 50 },
-                { id: 'gold_coin', weight: 50, quantityMin: 5, quantityMax: 20 }
+                { id: 'health_potion', weight: 40 },
+                { id: 'gold_coin', weight: 40, quantityMin: 5, quantityMax: 20 },
+                { id: 'cloth_armor', weight: 10 },
+                { id: 'rusty_sword', weight: 10 }
             ],
             uncommon: [
-                { id: 'health_potion_greater', weight: 40 },
-                { id: 'strength_boost', weight: 30 },
-                { id: 'agility_boost', weight: 30 }
+                { id: 'health_potion_greater', weight: 30 },
+                { id: 'strength_boost', weight: 20 },
+                { id: 'agility_boost', weight: 20 },
+                { id: 'copper_ring', weight: 15 },
+                { id: 'health_amulet', weight: 15 }
+            ],
+            rare: [
+                { id: 'iron_sword', weight: 20 },
+                { id: 'leather_vest', weight: 20 },
+                { id: 'silver_ring', weight: 20 },
+                { id: 'gold_coin', weight: 40, quantityMin: 50, quantityMax: 100 }
+            ]
+        },
+        boss_drop: {
+            uncommon: [
+                { id: 'health_potion_greater', weight: 20, quantityMin: 2, quantityMax: 3 },
+                { id: 'iron_sword', weight: 15 },
+                { id: 'chainmail_shirt', weight: 15 },
+                { id: 'silver_ring', weight: 15 },
+                { id: 'gold_coin', weight: 35, quantityMin: 100, quantityMax: 200 }
+            ],
+            rare: [
+                { id: 'berserker_axe', weight: 15 },
+                { id: 'elven_bow', weight: 15 },
+                { id: 'dragon_scale', weight: 15 },
+                { id: 'golden_ring', weight: 15 },
+                { id: 'gem_ruby', weight: 20 },
+                { id: 'gold_coin', weight: 20, quantityMin: 200, quantityMax: 500 }
+            ],
+            epic: [
+                { id: 'titan_armor', weight: 25 },
+                { id: 'divine_amulet', weight: 25 },
+                { id: 'arcane_staff', weight: 25 },
+                { id: 'gem_ruby', weight: 25, quantityMin: 3, quantityMax: 5 }
             ]
         }
     },
@@ -252,7 +324,8 @@ const Items = {
      * @returns {Object|null} Item definition or null
      */
     getItem(itemId) {
-        return this.database[itemId] || null;
+        // Check both databases
+        return this.database[itemId] || this.equipmentDatabase[itemId] || null;
     },
 
     /**
@@ -288,9 +361,11 @@ const Items = {
         const rarityRoll = Math.random() * 100;
         let selectedRarity = 'common';
 
-        if (floor >= 5 && rarityRoll < 5) { // 5% rare on floor 5+
+        if (floor >= 10 && rarityRoll < 2) { // 2% epic on floor 10+
+            selectedRarity = 'epic';
+        } else if (floor >= 5 && rarityRoll < 10) { // 10% rare on floor 5+
             selectedRarity = 'rare';
-        } else if (floor >= 3 && rarityRoll < 20) { // 20% uncommon on floor 3+
+        } else if (floor >= 3 && rarityRoll < 25) { // 25% uncommon on floor 3+
             selectedRarity = 'uncommon';
         }
 

@@ -95,6 +95,7 @@ const UICore = {
             heavyAttackBtn: document.getElementById('heavy-attack-btn'),
             blockBtn: document.getElementById('block-btn'),
             itemBtn: document.getElementById('item-btn'),
+            escapeBtn: document.getElementById('escape-btn'),
 
             // Menu options
             newGameBtn: document.getElementById('new-game'),

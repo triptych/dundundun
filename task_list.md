@@ -70,12 +70,12 @@
 - [x] Implement equipment upgrade system
 
 ### 9. Inventory Management
-- [ ] Create 20-slot inventory system
-- [ ] Implement item categorization
-- [ ] Build auto-sort functionality
-- [ ] Add drag-and-drop item management
-- [ ] Create item deletion/selling system
-- [ ] Design inventory UI for mobile
+- [x] Create 20-slot inventory system
+- [x] Implement item categorization
+- [x] Build auto-sort functionality
+- [x] Add drag-and-drop item management
+- [x] Create item deletion/selling system
+- [x] Design inventory UI for mobile
 
 ### 10. Advanced Combat Features
 - [ ] Implement Heavy Attack with cooldowns

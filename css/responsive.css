@@ -40,8 +40,58 @@
 /* Accessibility & Touch Improvements */
 
 @media (pointer: coarse) {
-    .move-btn, .nav-btn, .icon-btn, .combat-btn, .menu-option {
+    .move-btn {
+        width: 44px;
+        height: 44px;
+        font-size: 1.4rem;
+        min-height: 44px;
+        touch-action: manipulation;
+        -webkit-tap-highlight-color: transparent;
+    }
+
+    .movement-controls {
+        gap: 0.5rem;
+        max-width: 150px;
+    }
+
+    .nav-btn, .icon-btn, .combat-btn, .menu-option {
         min-height: 48px;
+    }
+
+    .action-panel {
+        padding: 0.75rem;
+    }
+}
+
+/* Specific mobile touch fixes */
+@media (max-width: 767px) {
+    .move-btn {
+        width: 40px;
+        height: 40px;
+        font-size: 1.3rem;
+        border-width: 1px;
+        touch-action: manipulation;
+        -webkit-tap-highlight-color: transparent;
+        -webkit-touch-callout: none;
+        -webkit-user-select: none;
+        -khtml-user-select: none;
+        -moz-user-select: none;
+        -ms-user-select: none;
+        user-select: none;
+    }
+
+    .movement-controls {
+        gap: 0.4rem;
+        max-width: 140px;
+    }
+
+    .action-panel {
+        z-index: 50;
+        border-top: 1px solid #333;
+    }
+
+    .bottom-nav {
+        z-index: 200;
     }
 }
 

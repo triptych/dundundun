@@ -135,16 +135,21 @@ const UICore = {
      * Set up touch-specific optimizations
      */
     setupTouchOptimizations() {
-        // Prevent default touch behaviors that might interfere with game
+        // Prevent default touch behaviors only for non-interactive elements
         document.addEventListener('touchstart', (e) => {
-            // Prevent zoom on double tap for game elements
-            if (e.target.closest('#app')) {
+            // Don't prevent default for buttons and interactive elements
+            if (e.target.matches('button, .move-btn, .nav-btn, .combat-btn, .menu-option, .icon-btn')) {
+                return;
+            }
+
+            // Prevent zoom on double tap for game canvas and background elements
+            if (e.target.closest('#game-canvas, .dungeon-container, .game-main')) {
                 e.preventDefault();
             }
         }, { passive: false });
 
-        // Handle touch feedback
-        const touchElements = document.querySelectorAll('button, .move-btn, .nav-btn, .combat-btn');
+        // Handle touch feedback for better mobile UX
+        const touchElements = document.querySelectorAll('button, .move-btn, .nav-btn, .combat-btn, .menu-option, .icon-btn');
         touchElements.forEach(element => {
             element.addEventListener('touchstart', (e) => {
                 element.classList.add('touching');
@@ -152,7 +157,40 @@ const UICore = {
 
             element.addEventListener('touchend', (e) => {
                 element.classList.remove('touching');
+                // Small delay to allow visual feedback
+                setTimeout(() => {
+                    element.classList.remove('touching');
+                }, 100);
             }, { passive: true });
+
+            element.addEventListener('touchcancel', (e) => {
+                element.classList.remove('touching');
+            }, { passive: true });
+        });
+
+        // Enhanced movement button handling for mobile
+        this.elements.moveBtns.forEach(btn => {
+            let touchStartTime = 0;
+
+            btn.addEventListener('touchstart', (e) => {
+                touchStartTime = Date.now();
+                e.stopPropagation();
+            }, { passive: true });
+
+            btn.addEventListener('touchend', (e) => {
+                const touchDuration = Date.now() - touchStartTime;
+
+                // Only trigger if it's a quick tap (not a long press)
+                if (touchDuration < 500) {
+                    e.preventDefault();
+                    e.stopPropagation();
+
+                    const direction = btn.dataset.direction;
+                    if (direction) {
+                        this.handleMovement(direction);
+                    }
+                }
+            }, { passive: false });
         });
     },
 

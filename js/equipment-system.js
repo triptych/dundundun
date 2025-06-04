@@ -801,7 +801,5 @@ const EquipmentSystem = {
     }
 };
 
-// Export for use in other modules
-if (typeof module !== 'undefined' && module.exports) {
-    module.exports = EquipmentSystem;
-}
+// Export for ES6 modules
+export default EquipmentSystem;

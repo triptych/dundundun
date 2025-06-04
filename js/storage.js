@@ -369,7 +369,5 @@ if (!Storage.available) {
     console.warn('localStorage is not available. Game progress will not be saved.');
 }
 
-// Export for use in other modules
-if (typeof module !== 'undefined' && module.exports) {
-    module.exports = Storage;
-}
+// Export for ES6 modules
+export default Storage;

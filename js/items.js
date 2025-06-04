@@ -1,7 +1,9 @@
 // Item System - Defines items, their properties, and interactions
+import EquipmentSystem from './equipment-system.js';
+
 const Items = {
-    // Load equipment database from EquipmentSystem if available
-    equipmentDatabase: typeof EquipmentSystem !== 'undefined' ? EquipmentSystem.equipmentDatabase : {},
+    // Load equipment database from EquipmentSystem
+    equipmentDatabase: EquipmentSystem.equipmentDatabase,
 
     // Item type definitions
     types: {
@@ -606,7 +608,5 @@ const Items = {
     }
 };
 
-// Export for use in other modules
-if (typeof module !== 'undefined' && module.exports) {
-    module.exports = Items;
-}
+// Export for ES6 modules
+export default Items;

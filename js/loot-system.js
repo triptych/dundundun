@@ -1,5 +1,6 @@
 // Loot System - Handles loot generation for dungeons and monster defeats
 // Integrates with the Items system to provide rewards
+import Items from './items.js';
 
 /**
  * Loot System for generating rewards from various sources
@@ -23,10 +24,8 @@ const LootSystem = {
         }
 
         // Generate loot using Items system
-        if (typeof Items !== 'undefined') {
-            const monsterLoot = Items.generateLoot('monster_drop', floor);
-            loot.push(...monsterLoot);
-        }
+        const monsterLoot = Items.generateLoot('monster_drop', floor);
+        loot.push(...monsterLoot);
 
         // Additional gold reward based on enemy and floor
         const goldAmount = this.calculateGoldReward(enemy, floor);
@@ -56,14 +55,12 @@ const LootSystem = {
         const loot = [];
 
         // Treasure rooms always give loot
-        if (typeof Items !== 'undefined') {
-            // Generate 1-3 items from treasure table
-            const itemCount = Math.floor(Math.random() * 3) + 1;
+        // Generate 1-3 items from treasure table
+        const itemCount = Math.floor(Math.random() * 3) + 1;
 
-            for (let i = 0; i < itemCount; i++) {
-                const treasureLoot = Items.generateLoot('treasure_room', floor);
-                loot.push(...treasureLoot);
-            }
+        for (let i = 0; i < itemCount; i++) {
+            const treasureLoot = Items.generateLoot('treasure_room', floor);
+            loot.push(...treasureLoot);
         }
 
         // Always include gold in treasure rooms
@@ -88,25 +85,23 @@ const LootSystem = {
         const loot = [];
 
         // Bosses have guaranteed rare+ item chance
-        if (typeof Items !== 'undefined') {
-            // Force rare rarity for boss drops
-            const rarityRoll = Math.random();
-            let forcedRarity = 'rare';
+        // Force rare rarity for boss drops
+        const rarityRoll = Math.random();
+        let forcedRarity = 'rare';
 
-            if (floor >= 10 && rarityRoll < 0.15) { // 15% legendary on floor 10+
-                forcedRarity = 'legendary';
-            } else if (floor >= 7 && rarityRoll < 0.25) { // 25% epic on floor 7+
-                forcedRarity = 'epic';
-            }
+        if (floor >= 10 && rarityRoll < 0.15) { // 15% legendary on floor 10+
+            forcedRarity = 'legendary';
+        } else if (floor >= 7 && rarityRoll < 0.25) { // 25% epic on floor 7+
+            forcedRarity = 'epic';
+        }
 
-            // Generate boss-specific loot table
-            const bossLootTable = this.getBossLootTable(forcedRarity);
-            if (bossLootTable.length > 0) {
-                const selectedItem = bossLootTable[Math.floor(Math.random() * bossLootTable.length)];
-                const item = Items.createItem(selectedItem.id, selectedItem.quantity || 1);
-                if (item) {
-                    loot.push(item);
-                }
+        // Generate boss-specific loot table
+        const bossLootTable = this.getBossLootTable(forcedRarity);
+        if (bossLootTable.length > 0) {
+            const selectedItem = bossLootTable[Math.floor(Math.random() * bossLootTable.length)];
+            const item = Items.createItem(selectedItem.id, selectedItem.quantity || 1);
+            if (item) {
+                loot.push(item);
             }
         }
 
@@ -276,9 +271,7 @@ const LootSystem = {
         };
 
         // Give starting weapon
-        if (typeof Items !== 'undefined') {
-            equipment.weapon = Items.createItem('iron_sword');
-        }
+        equipment.weapon = Items.createItem('iron_sword');
 
         return equipment;
     },
@@ -304,7 +297,5 @@ const LootSystem = {
     }
 };
 
-// Export for use in other modules
-if (typeof module !== 'undefined' && module.exports) {
-    module.exports = LootSystem;
-}
+// Export for ES6 modules
+export default LootSystem;

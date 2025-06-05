@@ -301,7 +301,5 @@ const Movement = {
     }
 };
 
-// Export for use in other modules
-if (typeof module !== 'undefined' && module.exports) {
-    module.exports = Movement;
-}
+// Export for ES6 modules
+export default Movement;

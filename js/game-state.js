@@ -1,5 +1,6 @@
 // Pocket Dungeon - Game State Management
 // Centralized state management for the entire game
+import Storage from './storage.js';
 
 /**
  * Room types for dungeon generation
@@ -1422,7 +1423,6 @@ const GameState = {
     }
 };
 
-// Export for use in other modules
-if (typeof module !== 'undefined' && module.exports) {
-    module.exports = GameState;
-}
+// Export for ES6 modules
+export { RoomTypes, Room, DungeonGrid };
+export default GameState;

@@ -6,6 +6,9 @@ import Storage from './storage.js';
 import EquipmentSystem from './equipment-system.js';
 import Items from './items.js';
 import LootSystem from './loot-system.js';
+import GameState, { RoomTypes, Room, DungeonGrid } from './game-state.js';
+import Movement from './movement.js';
+import Rooms from './rooms.js';
 
 // Make modules globally available for compatibility
 window.Utils = Utils;
@@ -13,6 +16,12 @@ window.Storage = Storage;
 window.EquipmentSystem = EquipmentSystem;
 window.Items = Items;
 window.LootSystem = LootSystem;
+window.GameState = GameState;
+window.RoomTypes = RoomTypes;
+window.Room = Room;
+window.DungeonGrid = DungeonGrid;
+window.Movement = Movement;
+window.Rooms = Rooms;
 
 // UI legacy compatibility layer
 console.log('UI legacy compatibility layer loaded');

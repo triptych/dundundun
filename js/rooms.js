@@ -358,7 +358,5 @@ const Rooms = {
     }
 };
 
-// Export for use in other modules
-if (typeof module !== 'undefined' && module.exports) {
-    module.exports = Rooms;
-}
+// Export for ES6 modules
+export default Rooms;

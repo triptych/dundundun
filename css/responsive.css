@@ -12,14 +12,14 @@
     }
 
     .movement-controls {
-        max-width: 250px;
-        gap: 1rem;
+        max-width: 160px;
+        gap: 0.4rem;
     }
 
     .move-btn {
-        min-width: 50px;
-        min-height: 50px;
-        font-size: 1.75rem;
+        width: 36px;
+        height: 36px;
+        font-size: 1.4rem;
     }
 
     .inventory-grid {

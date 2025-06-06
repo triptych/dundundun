@@ -403,7 +403,10 @@ const SaveSystem = {
     }
 };
 
-// Export for use in other modules
-if (typeof module !== 'undefined' && module.exports) {
-    module.exports = SaveSystem;
+// Export for ES6 modules
+export default SaveSystem;
+
+// Also make available globally for compatibility
+if (typeof window !== 'undefined') {
+    window.SaveSystem = SaveSystem;
 }

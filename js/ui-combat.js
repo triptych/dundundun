@@ -160,9 +160,10 @@ const UICombat = {
     }
 };
 
-// Export for use in other modules
-if (typeof module !== 'undefined' && module.exports) {
-    module.exports = UICombat;
-} else if (typeof window !== 'undefined') {
+// Export for ES6 modules
+export default UICombat;
+
+// Also make available globally for compatibility
+if (typeof window !== 'undefined') {
     window.UICombat = UICombat;
 }

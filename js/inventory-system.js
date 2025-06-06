@@ -678,7 +678,10 @@ document.addEventListener('DOMContentLoaded', () => {
     }, 200);
 });
 
-// Export for use in other modules
-if (typeof module !== 'undefined' && module.exports) {
-    module.exports = InventorySystem;
+// Export for ES6 modules
+export default InventorySystem;
+
+// Also make available globally for compatibility
+if (typeof window !== 'undefined') {
+    window.InventorySystem = InventorySystem;
 }

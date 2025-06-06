@@ -449,7 +449,10 @@ progressionStyles.textContent = `
 `;
 document.head.appendChild(progressionStyles);
 
-// Export for use in other modules
-if (typeof module !== 'undefined' && module.exports) {
-    module.exports = CharacterProgression;
+// Export for ES6 modules
+export default CharacterProgression;
+
+// Also make available globally for compatibility
+if (typeof window !== 'undefined') {
+    window.CharacterProgression = CharacterProgression;
 }

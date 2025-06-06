@@ -503,7 +503,10 @@ const Rendering = {
     }
 };
 
-// Export for use in other modules
-if (typeof module !== 'undefined' && module.exports) {
-    module.exports = Rendering;
+// Export for ES6 modules
+export default Rendering;
+
+// Also make available globally for compatibility
+if (typeof window !== 'undefined') {
+    window.Rendering = Rendering;
 }

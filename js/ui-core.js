@@ -300,9 +300,10 @@ const UICore = {
     }
 };
 
-// Export for use in other modules
-if (typeof module !== 'undefined' && module.exports) {
-    module.exports = UICore;
-} else if (typeof window !== 'undefined') {
+// Export for ES6 modules
+export default UICore;
+
+// Also make available globally for compatibility
+if (typeof window !== 'undefined') {
     window.UICore = UICore;
 }

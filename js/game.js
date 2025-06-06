@@ -515,7 +515,10 @@ document.addEventListener('DOMContentLoaded', () => {
     Game.init();
 });
 
-// Export for use in other modules
-if (typeof module !== 'undefined' && module.exports) {
-    module.exports = Game;
+// Export for ES6 modules
+export default Game;
+
+// Also make available globally for compatibility
+if (typeof window !== 'undefined') {
+    window.Game = Game;
 }

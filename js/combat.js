@@ -450,7 +450,10 @@ const Combat = {
     }
 };
 
-// Export for use in other modules
-if (typeof module !== 'undefined' && module.exports) {
-    module.exports = Combat;
+// Export for ES6 modules
+export default Combat;
+
+// Also make available globally for compatibility
+if (typeof window !== 'undefined') {
+    window.Combat = Combat;
 }

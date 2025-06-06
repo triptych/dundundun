@@ -209,7 +209,10 @@ const Animation = {
     }
 };
 
-// Export for use in other modules
-if (typeof module !== 'undefined' && module.exports) {
-    module.exports = Animation;
+// Export for ES6 modules
+export default Animation;
+
+// Also make available globally for compatibility
+if (typeof window !== 'undefined') {
+    window.Animation = Animation;
 }

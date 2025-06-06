@@ -379,9 +379,10 @@ const UIInventory = {
     }
 };
 
-// Export for use in other modules
-if (typeof module !== 'undefined' && module.exports) {
-    module.exports = UIInventory;
-} else if (typeof window !== 'undefined') {
+// Export for ES6 modules
+export default UIInventory;
+
+// Also make available globally for compatibility
+if (typeof window !== 'undefined') {
     window.UIInventory = UIInventory;
 }

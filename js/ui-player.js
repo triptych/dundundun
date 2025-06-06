@@ -288,9 +288,10 @@ const UIPlayer = {
     }
 };
 
-// Export for use in other modules
-if (typeof module !== 'undefined' && module.exports) {
-    module.exports = UIPlayer;
-} else if (typeof window !== 'undefined') {
+// Export for ES6 modules
+export default UIPlayer;
+
+// Also make available globally for compatibility
+if (typeof window !== 'undefined') {
     window.UIPlayer = UIPlayer;
 }

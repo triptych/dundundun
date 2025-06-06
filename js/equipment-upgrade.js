@@ -512,7 +512,10 @@ document.addEventListener('DOMContentLoaded', () => {
     }, 100);
 });
 
-// Export for use in other modules
-if (typeof module !== 'undefined' && module.exports) {
-    module.exports = EquipmentUpgrade;
+// Export for ES6 modules
+export default EquipmentUpgrade;
+
+// Also make available globally for compatibility
+if (typeof window !== 'undefined') {
+    window.EquipmentUpgrade = EquipmentUpgrade;
 }

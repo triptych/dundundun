@@ -317,13 +317,14 @@ const Combat = {
             this.shakeElement('.player-combat-info', actualDamage >= 15); // Intense shake for high damage
         }
 
+        // Reset for next turn - clear blocking state immediately after use
+        GameState.combat.playerTurn = true;
+        GameState.combat.lastAction = null;
+
         // Check if player died
         if (GameState.player.health <= 0) {
             this.endCombat(false, onCombatEnd);
         } else {
-            // Reset for next turn
-            GameState.combat.playerTurn = true;
-            GameState.combat.lastAction = null;
             GameState.emit('combatUpdate', GameState.combat);
         }
     },

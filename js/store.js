@@ -443,14 +443,22 @@ const Store = {
      * @returns {string} HTML string
      */
     renderPlayerItems() {
-        if (GameState.inventory.items.length === 0) {
-            return '<div class="empty-message">No items to sell</div>';
+        // Filter out equipped items
+        const sellableItems = GameState.inventory.items.filter((item, index) => {
+            return item && !this.isItemEquipped(item);
+        });
+
+        if (sellableItems.length === 0) {
+            return '<div class="empty-message">No items to sell (equipped items cannot be sold)</div>';
         }
 
-        return GameState.inventory.items.map((item, index) => {
+        return sellableItems.map((item, originalIndex) => {
+            // Find the original index in the full inventory
+            const actualIndex = GameState.inventory.items.indexOf(item);
             const sellPrice = Math.floor(item.value * this.config.sellback);
+
             return `
-                <div class="store-item" onclick="Store.sellItem(${index})">
+                <div class="store-item" onclick="Store.sellItem(${actualIndex})">
                     <div class="item-icon">${item.icon || '📦'}</div>
                     <div class="item-info">
                         <div class="item-name" style="color: ${Items.getRarityColor(item.rarity)}">${item.name}</div>
@@ -461,6 +469,22 @@ const Store = {
                 </div>
             `;
         }).join('');
+    },
+
+    /**
+     * Check if an item is currently equipped
+     * @param {Object} item - Item to check
+     * @returns {boolean} True if the item is equipped
+     */
+    isItemEquipped(item) {
+        if (!item || !GameState.player.equipment) return false;
+
+        const equipment = GameState.player.equipment;
+
+        // Check if this exact item object is equipped
+        return equipment.weapon === item ||
+               equipment.armor === item ||
+               equipment.accessory === item;
     },
 
     /**

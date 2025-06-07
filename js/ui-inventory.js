@@ -5,6 +5,9 @@
  * Inventory UI Manager for handling inventory and item interactions
  */
 const UIInventory = {
+    // Store reference to outside click handler for cleanup
+    outsideClickHandler: null,
+
     /**
      * Initialize inventory UI
      */
@@ -124,9 +127,11 @@ const UIInventory = {
             this.hideItemActionMenu();
         });
 
+        // Store the bound handler for cleanup and add outside click listener
+        this.outsideClickHandler = this.handleOutsideMenuClick.bind(this);
         setTimeout(() => {
-            document.addEventListener('click', this.handleOutsideMenuClick.bind(this), { once: true });
-        }, 100);
+            document.addEventListener('click', this.outsideClickHandler, { once: true });
+        }, 150);
     },
 
     /**
@@ -295,9 +300,11 @@ const UIInventory = {
             });
         }
 
+        // Store the bound handler for cleanup and add outside click listener
+        this.outsideClickHandler = this.handleOutsideMenuClick.bind(this);
         setTimeout(() => {
-            document.addEventListener('click', this.handleOutsideMenuClick.bind(this), { once: true });
-        }, 100);
+            document.addEventListener('click', this.outsideClickHandler, { once: true });
+        }, 150);
     },
 
     /**
@@ -311,6 +318,11 @@ const UIInventory = {
             return;
         }
 
+        // Don't close menu if clicking on inventory slots or equipment slots - let them handle showing new menus
+        if (event.target.closest('.inventory-slot') || event.target.closest('.equipment-slot')) {
+            return;
+        }
+
         if (menu && !menu.contains(event.target)) {
             this.hideItemActionMenu();
         }
@@ -320,6 +332,12 @@ const UIInventory = {
      * Hide item action menu
      */
     hideItemActionMenu() {
+        // Clean up any existing outside click listener
+        if (this.outsideClickHandler) {
+            document.removeEventListener('click', this.outsideClickHandler);
+            this.outsideClickHandler = null;
+        }
+
         const menu = document.getElementById('item-action-menu');
         if (menu) {
             document.body.removeChild(menu);

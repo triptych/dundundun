@@ -752,6 +752,7 @@ const GameState = {
         agility: 10,
         vitality: 10,
         availablePoints: 0,
+        skillPoints: 0,
         x: 2, // Grid position (start at center)
         y: 2, // Grid position (start at center)
         floor: 1,
@@ -759,7 +760,8 @@ const GameState = {
             weapon: null,
             armor: null,
             accessory: null
-        }
+        },
+        abilities: {}
     },
 
     // Dungeon state with room grid system

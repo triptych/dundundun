@@ -32,6 +32,8 @@ import Animation from './animation.js';
 import Combat from './combat.js';
 import CharacterProgression from './character-progression.js';
 import SaveSystem from './save-system.js';
+import Skills from './skills.js';
+import QuestSystem from './quest-system.js';
 import Game from './game.js';
 
 // Make core modules globally available for compatibility
@@ -68,6 +70,8 @@ window.Animation = Animation;
 window.Combat = Combat;
 window.CharacterProgression = CharacterProgression;
 window.SaveSystem = SaveSystem;
+window.Skills = Skills;
+window.QuestSystem = QuestSystem;
 window.Game = Game;
 
 console.log('All modules loaded and available globally');

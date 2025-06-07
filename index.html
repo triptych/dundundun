@@ -11,6 +11,7 @@
         <link rel="stylesheet" href="css/equipment.css">
         <link rel="stylesheet" href="css/character-fix.css">
         <link rel="stylesheet" href="css/store.css">
+        <link rel="stylesheet" href="css/skills.css">
     </head>
     <body>
         <div id="app">
@@ -188,6 +189,33 @@
                             <div class="stat-row">
                                 <span class="stat-name">Max Health</span>
                                 <span class="stat-value" id="max-health">120</span>
+                            </div>
+                        </div>
+
+                        <!-- Quests Section -->
+                        <div class="quests-section">
+                            <h4>Quests</h4>
+                            <div class="quest-list" id="quest-list">
+                                <div class="quest-empty">No active quests</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Quest Details Modal -->
+                    <div class="quest-modal" id="quest-modal" style="display: none;">
+                        <div class="quest-modal-content">
+                            <div class="quest-modal-header">
+                                <h4 id="quest-modal-title">Quest Title</h4>
+                                <button class="quest-modal-close" id="quest-modal-close">&times;</button>
+                            </div>
+                            <div class="quest-modal-body">
+                                <p id="quest-modal-description">Quest description goes here.</p>
+                                <div class="quest-objectives" id="quest-modal-objectives">
+                                    <!-- Objectives will be populated here -->
+                                </div>
+                                <div class="quest-rewards" id="quest-modal-rewards">
+                                    <!-- Rewards will be populated here -->
+                                </div>
                             </div>
                         </div>
                     </div>

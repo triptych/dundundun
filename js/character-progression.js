@@ -24,6 +24,14 @@ const CharacterProgression = {
         this.setupGameStateListeners();
 
         console.log('Character Progression system initialized');
+
+        // Initialize Skills and Quest systems if available
+        if (typeof Skills !== 'undefined') {
+            Skills.init();
+        }
+        if (typeof QuestSystem !== 'undefined') {
+            QuestSystem.init();
+        }
     },
 
     /**

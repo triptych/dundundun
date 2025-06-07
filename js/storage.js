@@ -358,6 +358,44 @@ const Storage = {
                 deathCount: 0,
                 achievements: []
             });
+        },
+
+        /**
+         * Save skill tree data
+         * @param {Object} skillData - Skill tree progress
+         * @returns {boolean} Success status
+         */
+        saveSkills(skillData) {
+            return Storage.save('skills', skillData);
+        },
+
+        /**
+         * Load skill tree data
+         * @returns {Object|null} Skill data or null
+         */
+        loadSkills() {
+            return Storage.load('skills', null);
+        },
+
+        /**
+         * Save quest data
+         * @param {Object} questData - Quest progress and completed quests
+         * @returns {boolean} Success status
+         */
+        saveQuests(questData) {
+            return Storage.save('quests', questData);
+        },
+
+        /**
+         * Load quest data
+         * @returns {Object} Quest data with defaults
+         */
+        loadQuests() {
+            return Storage.load('quests', {
+                activeQuests: [],
+                completedQuests: [],
+                questProgress: {}
+            });
         }
     }
 };

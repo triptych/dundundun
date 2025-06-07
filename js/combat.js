@@ -236,11 +236,23 @@ const Combat = {
         const roll = Math.random() * 100;
 
         if (roll < finalEscapeChance) {
-            // Escape successful
+            // Escape successful - but at a cost
+            // Calculate HP loss: 10-20% of current HP, minimum 1, maximum 25% of max HP
+            const currentHp = GameState.player.health;
+            const maxHp = GameState.player.maxHealth;
+            const minLoss = Math.max(1, Math.floor(currentHp * 0.10));
+            const maxLoss = Math.min(Math.floor(maxHp * 0.25), Math.floor(currentHp * 0.20));
+            const hpLoss = Math.max(minLoss, Math.floor(Math.random() * (maxLoss - minLoss + 1)) + minLoss);
+
+            // Ensure escape doesn't kill the player
+            const newHp = Math.max(1, currentHp - hpLoss);
+            GameState.updatePlayer({ health: newHp });
+
             GameState.combat.log.push(`You successfully escaped! (${Math.round(finalEscapeChance)}% chance)`);
+            GameState.combat.log.push(`You lost ${hpLoss} HP while escaping.`);
 
             if (typeof UI !== 'undefined' && UI.showNotification) {
-                UI.showNotification('Escaped successfully!', 1500, 'info');
+                UI.showNotification(`Escaped successfully! Lost ${hpLoss} HP`, 2000, 'info');
             }
 
             // End combat directly without triggering death logic
@@ -256,15 +268,20 @@ const Combat = {
                 GameState.saveGameData();
             }
 
-            if (onCombatEnd) {
-                onCombatEnd(false);
-            }
+            // Don't call onCombatEnd for successful escapes - it's not a defeat
+            // The combat just ended via escape, not victory or defeat
         } else {
-            // Escape failed
+            // Escape failed - take some damage from the failed attempt
+            const currentHp = GameState.player.health;
+            const failureDamage = Math.max(1, Math.floor(currentHp * 0.05)); // 5% current HP
+            const newHp = Math.max(1, currentHp - failureDamage);
+            GameState.updatePlayer({ health: newHp });
+
             GameState.combat.log.push(`Failed to escape! (${Math.round(finalEscapeChance)}% chance)`);
+            GameState.combat.log.push(`You lost ${failureDamage} HP in the failed attempt.`);
 
             if (typeof UI !== 'undefined' && UI.showNotification) {
-                UI.showNotification('Escape failed!', 1500, 'warning');
+                UI.showNotification(`Escape failed! Lost ${failureDamage} HP`, 1500, 'warning');
             }
 
             // End player turn and let enemy attack

@@ -456,25 +456,55 @@ const Rendering = {
             playerRenderY = gridStartY + (playerY * gridSize) + gridSize / 2;
         }
 
-        // Draw player
-        this.ctx.fillStyle = '#d4af37';
-        const playerSize = 12;
+        // Draw player as a cute little face
+        const faceSize = 16;
+        const radius = faceSize / 2;
+
+        // Draw face background (head)
+        this.ctx.fillStyle = '#ffdbac'; // Skin tone
+        this.ctx.beginPath();
+        this.ctx.arc(playerRenderX, playerRenderY, radius, 0, 2 * Math.PI);
+        this.ctx.fill();
+
+        // Draw face border
+        this.ctx.strokeStyle = '#d4af37';
+        this.ctx.lineWidth = 2;
+        this.ctx.stroke();
+
+        // Draw eyes
+        this.ctx.fillStyle = '#333';
+        const eyeSize = 2;
+        const eyeOffsetX = 3;
+        const eyeOffsetY = -2;
+
+        // Left eye
         this.ctx.fillRect(
-            playerRenderX - playerSize / 2,
-            playerRenderY - playerSize / 2,
-            playerSize,
-            playerSize
+            playerRenderX - eyeOffsetX - eyeSize/2,
+            playerRenderY + eyeOffsetY - eyeSize/2,
+            eyeSize,
+            eyeSize
         );
 
-        // Draw player border for visibility
-        this.ctx.strokeStyle = '#fff';
-        this.ctx.lineWidth = 2;
-        this.ctx.strokeRect(
-            playerRenderX - playerSize / 2,
-            playerRenderY - playerSize / 2,
-            playerSize,
-            playerSize
+        // Right eye
+        this.ctx.fillRect(
+            playerRenderX + eyeOffsetX - eyeSize/2,
+            playerRenderY + eyeOffsetY - eyeSize/2,
+            eyeSize,
+            eyeSize
         );
+
+        // Draw smile
+        this.ctx.strokeStyle = '#333';
+        this.ctx.lineWidth = 1;
+        this.ctx.beginPath();
+        this.ctx.arc(playerRenderX, playerRenderY + 2, 4, 0, Math.PI);
+        this.ctx.stroke();
+
+        // Add a small highlight to make it more visible
+        this.ctx.fillStyle = 'rgba(255, 255, 255, 0.3)';
+        this.ctx.beginPath();
+        this.ctx.arc(playerRenderX - 2, playerRenderY - 3, 3, 0, 2 * Math.PI);
+        this.ctx.fill();
     },
 
     /**

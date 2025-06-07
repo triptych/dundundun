@@ -9,6 +9,7 @@
 @import url('layout.css');
 
 /* Component styles */
+@import url('splash.css');
 @import url('loading.css');
 @import url('header-navigation.css');
 @import url('controls.css');
@@ -16,6 +17,7 @@
 @import url('character.css');
 @import url('combat.css');
 @import url('menu.css');
+@import url('settings.css');
 
 /* Effects and animations */
 @import url('animations.css');

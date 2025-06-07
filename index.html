@@ -15,7 +15,21 @@
     </head>
     <body>
         <div id="app">
-            <div id="loading-screen" class="screen active">
+            <!-- Splash Screen -->
+            <div id="splash-screen" class="splash-screen">
+                <div class="splash-content">
+                    <div class="splash-logo">Dun Dun Dungeon</div>
+                    <div class="splash-subtitle">Epic Adventures Await</div>
+                    <div class="splash-loading">
+                        <div class="splash-spinner"></div>
+                        <div class="splash-loading-text">Loading...</div>
+                    </div>
+                    <div class="splash-instructions">Click to start your adventure!</div>
+                    <button id="splash-start-btn" class="splash-start-btn" style="display: none;">Start Game</button>
+                </div>
+            </div>
+
+            <div id="loading-screen" class="screen active" style="display: none;">
                 <div class="loading-content">
                     <h1>Pocket Dungeon</h1>
                     <div class="loading-spinner"></div>
@@ -78,6 +92,128 @@
                         <button class="menu-option" id="settings">Settings</button>
                         <button class="menu-option" id="help">Help</button>
                         <button class="menu-option" id="close-menu">Return to Game</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Settings Panel -->
+            <div id="settings-screen" class="screen overlay" style="display: none;">
+                <div class="settings-content">
+                    <div class="settings-header">
+                        <h2>Settings</h2>
+                        <button class="settings-close" id="settings-close">&times;</button>
+                    </div>
+                    <div class="settings-sections">
+                        <!-- Audio Settings -->
+                        <div class="settings-section">
+                            <h3>Audio</h3>
+                            <div class="setting-item">
+                                <label for="master-volume">Master Volume</label>
+                                <div class="volume-control">
+                                    <input type="range" id="master-volume" min="0" max="100" value="50">
+                                    <span class="volume-value">50%</span>
+                                </div>
+                            </div>
+                            <div class="setting-item">
+                                <label for="sfx-volume">Sound Effects</label>
+                                <div class="volume-control">
+                                    <input type="range" id="sfx-volume" min="0" max="100" value="70">
+                                    <span class="volume-value">70%</span>
+                                </div>
+                            </div>
+                            <div class="setting-item">
+                                <label for="music-volume">Music</label>
+                                <div class="volume-control">
+                                    <input type="range" id="music-volume" min="0" max="100" value="30">
+                                    <span class="volume-value">30%</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Gameplay Settings -->
+                        <div class="settings-section">
+                            <h3>Gameplay</h3>
+                            <div class="setting-item">
+                                <label for="auto-save">Auto Save</label>
+                                <div class="toggle-switch">
+                                    <input type="checkbox" id="auto-save" checked="checked">
+                                    <span class="toggle-slider"></span>
+                                </div>
+                            </div>
+                            <div class="setting-item">
+                                <label for="damage-numbers">Show Damage Numbers</label>
+                                <div class="toggle-switch">
+                                    <input type="checkbox" id="damage-numbers" checked="checked">
+                                    <span class="toggle-slider"></span>
+                                </div>
+                            </div>
+                            <div class="setting-item">
+                                <label for="tutorial-hints">Tutorial Hints</label>
+                                <div class="toggle-switch">
+                                    <input type="checkbox" id="tutorial-hints" checked="checked">
+                                    <span class="toggle-slider"></span>
+                                </div>
+                            </div>
+                            <div class="setting-item">
+                                <label for="movement-speed">Movement Speed</label>
+                                <select id="movement-speed">
+                                    <option value="slow">Slow</option>
+                                    <option value="normal" selected="selected">Normal</option>
+                                    <option value="fast">Fast</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <!-- Display Settings -->
+                        <div class="settings-section">
+                            <h3>Display</h3>
+                            <div class="setting-item">
+                                <label for="screen-shake">Screen Shake</label>
+                                <div class="toggle-switch">
+                                    <input type="checkbox" id="screen-shake" checked="checked">
+                                    <span class="toggle-slider"></span>
+                                </div>
+                            </div>
+                            <div class="setting-item">
+                                <label for="animations">Animations</label>
+                                <div class="toggle-switch">
+                                    <input type="checkbox" id="animations" checked="checked">
+                                    <span class="toggle-slider"></span>
+                                </div>
+                            </div>
+                            <div class="setting-item">
+                                <label for="theme">Theme</label>
+                                <select id="theme">
+                                    <option value="dark" selected="selected">Dark</option>
+                                    <option value="light">Light</option>
+                                    <option value="auto">Auto</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <!-- Controls Settings -->
+                        <div class="settings-section">
+                            <h3>Controls</h3>
+                            <div class="setting-item">
+                                <label for="touch-controls">Touch Controls</label>
+                                <div class="toggle-switch">
+                                    <input type="checkbox" id="touch-controls" checked="checked">
+                                    <span class="toggle-slider"></span>
+                                </div>
+                            </div>
+                            <div class="setting-item">
+                                <label for="haptic-feedback">Haptic Feedback</label>
+                                <div class="toggle-switch">
+                                    <input type="checkbox" id="haptic-feedback" checked="checked">
+                                    <span class="toggle-slider"></span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="settings-actions">
+                        <button class="settings-btn reset" id="reset-settings">Reset to Default</button>
+                        <button class="settings-btn save" id="save-settings">Save Settings</button>
                     </div>
                 </div>
             </div>

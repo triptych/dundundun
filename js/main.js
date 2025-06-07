@@ -26,6 +26,10 @@ import InventorySystem from './inventory-system.js';
 import EquipmentIntegration from './equipment-integration.js';
 import EquipmentUpgrade from './equipment-upgrade.js';
 
+// New UI systems
+import SplashScreen from './splash-screen.js';
+import SettingsPanel from './settings-panel.js';
+
 // Other game systems
 import Rendering from './rendering.js';
 import Animation from './animation.js';
@@ -64,6 +68,10 @@ window.InventorySystem = InventorySystem;
 window.EquipmentIntegration = EquipmentIntegration;
 window.EquipmentUpgrade = EquipmentUpgrade;
 
+// Make new UI systems globally available for compatibility
+window.SplashScreen = SplashScreen;
+window.SettingsPanel = SettingsPanel;
+
 // Make other game systems globally available for compatibility
 window.Rendering = Rendering;
 window.Animation = Animation;
@@ -82,9 +90,12 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Initialize game systems in the correct order
     try {
-        // Storage and utilities are already available
+        // Initialize splash screen first
+        SplashScreen.init();
 
-        // Game will be initialized by existing scripts
+        // Initialize settings panel
+        SettingsPanel.init();
+
         console.log('Main modules loaded successfully');
     } catch (error) {
         console.error('Failed to initialize game modules:', error);

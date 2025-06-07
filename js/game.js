@@ -515,10 +515,8 @@ const Game = {
     }
 };
 
-// Initialize game when DOM is loaded
-document.addEventListener('DOMContentLoaded', () => {
-    Game.init();
-});
+// Don't auto-initialize - let splash screen control initialization
+// Game will be initialized via SplashScreen.startGame()
 
 // Export for ES6 modules
 export default Game;

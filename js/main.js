@@ -10,6 +10,7 @@ import LootSystem from './loot-system.js';
 import GameState, { RoomTypes, Room, DungeonGrid } from './game-state.js';
 import Movement from './movement.js';
 import Rooms from './rooms.js';
+import Store from './store.js';
 
 // UI modules
 import UICore from './ui-core.js';
@@ -45,6 +46,7 @@ window.Room = Room;
 window.DungeonGrid = DungeonGrid;
 window.Movement = Movement;
 window.Rooms = Rooms;
+window.Store = Store;
 
 // Make UI modules globally available for compatibility
 window.UICore = UICore;

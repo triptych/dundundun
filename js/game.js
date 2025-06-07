@@ -89,6 +89,11 @@ const Game = {
             CharacterProgression.init();
         }
 
+        // Initialize Store system
+        if (typeof Store !== 'undefined') {
+            Store.init();
+        }
+
         // Set up event listeners between systems
         this.setupSystemEvents();
 

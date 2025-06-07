@@ -1,0 +1,372 @@
+/* Store System Styles */
+
+.store-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.8);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+}
+
+.store-container {
+    background: #2a2a2a;
+    border: 2px solid #555;
+    border-radius: 10px;
+    padding: 20px;
+    width: 90%;
+    max-width: 800px;
+    max-height: 80%;
+    overflow: hidden;
+    color: #fff;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
+}
+
+.store-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+    padding-bottom: 15px;
+    border-bottom: 2px solid #555;
+}
+
+.store-header h2 {
+    margin: 0;
+    color: #ff9800;
+    font-size: 1.5em;
+}
+
+.store-close-btn {
+    background: #f44336;
+    color: white;
+    border: none;
+    border-radius: 50%;
+    width: 30px;
+    height: 30px;
+    font-size: 16px;
+    cursor: pointer;
+    transition: background 0.2s;
+}
+
+.store-close-btn:hover {
+    background: #d32f2f;
+}
+
+.store-tabs {
+    display: flex;
+    margin-bottom: 20px;
+    border-bottom: 1px solid #555;
+}
+
+.store-tab {
+    background: transparent;
+    color: #ccc;
+    border: none;
+    padding: 10px 20px;
+    cursor: pointer;
+    font-size: 14px;
+    transition: all 0.2s;
+    border-bottom: 2px solid transparent;
+}
+
+.store-tab:hover {
+    color: #fff;
+    background: rgba(255, 255, 255, 0.1);
+}
+
+.store-tab.active {
+    color: #ff9800;
+    border-bottom-color: #ff9800;
+}
+
+.store-content {
+    max-height: 400px;
+    overflow-y: auto;
+}
+
+.store-tab-content {
+    display: none;
+}
+
+.store-tab-content.active {
+    display: block;
+}
+
+.store-actions {
+    margin-bottom: 15px;
+}
+
+.refresh-btn {
+    background: #4caf50;
+    color: white;
+    border: none;
+    padding: 8px 16px;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 14px;
+    transition: background 0.2s;
+}
+
+.refresh-btn:hover {
+    background: #45a049;
+}
+
+.store-info {
+    background: rgba(255, 152, 0, 0.1);
+    border: 1px solid #ff9800;
+    border-radius: 5px;
+    padding: 10px;
+    margin-bottom: 15px;
+    color: #ffb74d;
+}
+
+.store-items {
+    display: grid;
+    gap: 10px;
+    max-height: 300px;
+    overflow-y: auto;
+}
+
+.store-item {
+    display: flex;
+    align-items: center;
+    background: #333;
+    border: 1px solid #555;
+    border-radius: 8px;
+    padding: 12px;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.store-item:hover {
+    background: #404040;
+    border-color: #ff9800;
+    transform: translateY(-2px);
+}
+
+.item-icon {
+    font-size: 2em;
+    margin-right: 15px;
+    min-width: 50px;
+    text-align: center;
+}
+
+.item-info {
+    flex: 1;
+    min-width: 0;
+}
+
+.item-name {
+    font-weight: bold;
+    font-size: 1.1em;
+    margin-bottom: 4px;
+}
+
+.item-description {
+    color: #ccc;
+    font-size: 0.9em;
+    margin-bottom: 4px;
+    line-height: 1.3;
+}
+
+.item-quantity {
+    color: #888;
+    font-size: 0.8em;
+}
+
+.item-price {
+    font-size: 1.2em;
+    font-weight: bold;
+    color: #ffd54f;
+    margin-left: 15px;
+    min-width: 60px;
+    text-align: right;
+}
+
+.store-footer {
+    margin-top: 20px;
+    padding-top: 15px;
+    border-top: 1px solid #555;
+    text-align: center;
+}
+
+.player-gold {
+    font-size: 1.2em;
+    font-weight: bold;
+    color: #ffd54f;
+}
+
+.empty-message {
+    text-align: center;
+    color: #888;
+    font-style: italic;
+    padding: 40px 20px;
+}
+
+/* Scrollbar styling */
+.store-content::-webkit-scrollbar,
+.store-items::-webkit-scrollbar {
+    width: 8px;
+}
+
+.store-content::-webkit-scrollbar-track,
+.store-items::-webkit-scrollbar-track {
+    background: #333;
+    border-radius: 4px;
+}
+
+.store-content::-webkit-scrollbar-thumb,
+.store-items::-webkit-scrollbar-thumb {
+    background: #666;
+    border-radius: 4px;
+}
+
+.store-content::-webkit-scrollbar-thumb:hover,
+.store-items::-webkit-scrollbar-thumb:hover {
+    background: #888;
+}
+
+/* Responsive design */
+@media (max-width: 768px) {
+    .store-container {
+        width: 95%;
+        padding: 15px;
+        max-height: 85%;
+    }
+
+    .store-header h2 {
+        font-size: 1.3em;
+    }
+
+    .store-tabs {
+        flex-wrap: wrap;
+    }
+
+    .store-tab {
+        padding: 8px 15px;
+        font-size: 13px;
+    }
+
+    .store-item {
+        padding: 10px;
+    }
+
+    .item-icon {
+        font-size: 1.5em;
+        margin-right: 10px;
+        min-width: 40px;
+    }
+
+    .item-name {
+        font-size: 1em;
+    }
+
+    .item-description {
+        font-size: 0.8em;
+    }
+
+    .item-price {
+        font-size: 1.1em;
+        min-width: 50px;
+    }
+}
+
+@media (max-width: 480px) {
+    .store-container {
+        width: 98%;
+        padding: 10px;
+        max-height: 90%;
+    }
+
+    .store-item {
+        flex-direction: column;
+        text-align: center;
+        padding: 15px;
+    }
+
+    .item-icon {
+        margin: 0 0 10px 0;
+    }
+
+    .item-info {
+        margin-bottom: 10px;
+    }
+
+    .item-price {
+        margin: 0;
+        text-align: center;
+        font-size: 1.3em;
+    }
+}
+
+/* Animations */
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: scale(0.9);
+    }
+    to {
+        opacity: 1;
+        transform: scale(1);
+    }
+}
+
+.store-overlay {
+    animation: fadeIn 0.3s ease-out;
+}
+
+.store-item {
+    animation: fadeIn 0.2s ease-out;
+}
+
+/* Item rarity border colors */
+.store-item[data-rarity="common"] {
+    border-left: 4px solid #9e9e9e;
+}
+
+.store-item[data-rarity="uncommon"] {
+    border-left: 4px solid #4caf50;
+}
+
+.store-item[data-rarity="rare"] {
+    border-left: 4px solid #2196f3;
+}
+
+.store-item[data-rarity="epic"] {
+    border-left: 4px solid #9c27b0;
+}
+
+.store-item[data-rarity="legendary"] {
+    border-left: 4px solid #ff9800;
+}
+
+/* Special effects for store items */
+.store-item:active {
+    transform: translateY(0);
+    background: #4a4a4a;
+}
+
+.store-tab-content {
+    animation: fadeIn 0.2s ease-out;
+}
+
+/* Loading state */
+.store-items.loading {
+    opacity: 0.5;
+    pointer-events: none;
+}
+
+.store-items.loading::after {
+    content: "Loading...";
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    color: #fff;
+    font-size: 1.2em;
+}

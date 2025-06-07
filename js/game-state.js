@@ -11,7 +11,8 @@ const RoomTypes = {
     TREASURE: 'treasure',
     BOSS: 'boss',
     STAIRS: 'stairs',
-    START: 'start'
+    START: 'start',
+    STORE: 'store'
 };
 
 /**
@@ -593,6 +594,13 @@ class DungeonGrid {
             rooms.splice(rooms.indexOf(stairsRoom), 1);
         }
 
+        // Place store room on every 10th floor
+        if (this.floor % 10 === 0 && rooms.length > 0) {
+            const storeRoom = rooms[Math.floor(Math.random() * rooms.length)];
+            storeRoom.type = RoomTypes.STORE;
+            rooms.splice(rooms.indexOf(storeRoom), 1);
+        }
+
         // Place boss room if enough rooms (at least 7 rooms total)
         if (this.roomCount >= 7 && rooms.length > 0) {
             const bossRoom = rooms[Math.floor(Math.random() * rooms.length)];
@@ -1147,6 +1155,20 @@ const GameState = {
 
         this.switchScreen('combat');
         this.emit('combatUpdate', this.combat);
+
+        // Force save when combat starts to ensure state is preserved on reload
+        console.log('Saving game data with combat active...', this.combat);
+        const saveResult = this.saveGameData();
+        console.log('Save result:', saveResult);
+
+        // Verify the save worked by loading it immediately
+        setTimeout(() => {
+            const loadedState = Storage.Game.loadState();
+            console.log('Loaded state after save:', loadedState ? 'Found data' : 'No data found');
+            if (loadedState && loadedState.combat) {
+                console.log('Combat state in saved data:', loadedState.combat.isActive);
+            }
+        }, 100);
     },
 
     /**
@@ -1348,6 +1370,34 @@ const GameState = {
                 }
 
                 this.current.isGameActive = true;
+
+                // Check if combat was active when saved and restore combat screen
+                if (this.combat.isActive && this.combat.enemy) {
+                    console.log('Restoring combat state after page reload');
+                    this.current.screen = 'combat';
+
+                    // Emit combat update to restore the combat UI with more robust restoration
+                    setTimeout(() => {
+                        console.log('Restoring combat UI with enemy:', this.combat.enemy);
+
+                        // Make sure the combat overlay is visible
+                        const combatOverlay = document.getElementById('combat-overlay');
+                        if (combatOverlay) {
+                            combatOverlay.classList.add('active');
+                        }
+
+                        // Emit the combat update event
+                        this.emit('combatUpdate', this.combat);
+
+                        // Also emit a screen change event to ensure proper UI state
+                        this.emit('stateChange', {
+                            type: 'screenChange',
+                            from: 'loading',
+                            to: 'combat',
+                            state: this.current
+                        });
+                    }, 200);
+                }
             }
 
             return true;

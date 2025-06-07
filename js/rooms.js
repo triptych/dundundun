@@ -37,6 +37,9 @@ const Rooms = {
             case 'start':
                 this.handleStartRoom();
                 break;
+            case 'store':
+                this.handleStoreRoom();
+                break;
             case 'empty':
                 this.handleEmptyRoom(onCombatTriggered);
                 break;
@@ -193,6 +196,25 @@ const Rooms = {
     },
 
     /**
+     * Handle store room events
+     */
+    handleStoreRoom() {
+        console.log('Found a merchant store!');
+
+        // Show store notification
+        if (typeof UI !== 'undefined' && UI.showNotification) {
+            UI.showNotification('Merchant Store found! Click to open shop', 3000, 'info');
+        }
+
+        // Open store interface if Store system is available
+        if (typeof Store !== 'undefined') {
+            Store.openStore();
+        } else {
+            console.warn('Store system not available');
+        }
+    },
+
+    /**
      * Handle empty room events
      * @param {Function} onCombatTriggered - Callback when combat is triggered
      */
@@ -257,7 +279,8 @@ const Rooms = {
             'monster': 'Monster Lair',
             'treasure': 'Treasure Chamber',
             'boss': 'Boss Arena',
-            'stairs': 'Stairs to Next Floor'
+            'stairs': 'Stairs to Next Floor',
+            'store': 'Merchant Store'
         };
 
         return descriptions[roomType] || 'Unknown Room';
@@ -279,7 +302,8 @@ const Rooms = {
             'monster': '#ff6b6b',  // Red
             'treasure': '#ffd93d', // Gold
             'boss': '#9c27b0',     // Purple
-            'stairs': '#4caf50'    // Green
+            'stairs': '#4caf50',   // Green
+            'store': '#ff9800'     // Orange
         };
 
         let color = baseColors[roomType] || '#666';

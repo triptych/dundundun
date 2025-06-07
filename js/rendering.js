@@ -365,7 +365,8 @@ const Rendering = {
             'monster': '#ff6b6b',  // Red
             'treasure': '#ffd93d', // Gold
             'boss': '#9c27b0',     // Purple
-            'stairs': '#4caf50'    // Green
+            'stairs': '#4caf50',   // Green
+            'store': '#ff9800'     // Orange
         };
 
         // Draw each room

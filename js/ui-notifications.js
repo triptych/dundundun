@@ -5,6 +5,11 @@
  * Notifications UI Manager for user feedback and indicators
  */
 const UINotifications = {
+    // Notification queue and management
+    notificationQueue: [],
+    activeNotifications: [],
+    nextNotificationId: 1,
+
     /**
      * Initialize notifications UI
      */
@@ -80,6 +85,55 @@ const UINotifications = {
      * @param {string} type - Type of notification (success, error, warning, info)
      */
     showNotification(message, duration = 2000, type = 'info') {
+        const notificationData = {
+            id: this.nextNotificationId++,
+            message,
+            duration,
+            type,
+            timestamp: Date.now()
+        };
+
+        // Add to queue
+        this.notificationQueue.push(notificationData);
+
+        // Process the queue
+        this.processNotificationQueue();
+    },
+
+    /**
+     * Process the notification queue to show notifications properly spaced
+     */
+    processNotificationQueue() {
+        // Only show notification if it's not already being processed
+        if (this.processingQueue) return;
+
+        // If no notifications in queue, return
+        if (this.notificationQueue.length === 0) return;
+
+        this.processingQueue = true;
+
+        // Get the next notification from queue
+        const notificationData = this.notificationQueue.shift();
+
+        // Show the notification
+        this.displayNotification(notificationData);
+
+        // Process next notification after a small delay to prevent overlap
+        setTimeout(() => {
+            this.processingQueue = false;
+            if (this.notificationQueue.length > 0) {
+                this.processNotificationQueue();
+            }
+        }, 500); // Small delay between notifications
+    },
+
+    /**
+     * Display a single notification
+     * @param {Object} notificationData - Notification data object
+     */
+    displayNotification(notificationData) {
+        const { message, duration, type, id } = notificationData;
+
         // Define notification colors based on type
         const colors = {
             success: { bg: 'rgba(76, 175, 80, 0.9)', color: '#ffffff' },
@@ -90,13 +144,17 @@ const UINotifications = {
 
         const typeColors = colors[type] || colors.info;
 
+        // Calculate position based on active notifications
+        const topOffset = 20 + (this.activeNotifications.length * 80); // 80px spacing between notifications
+
         // Create notification element
         const notification = document.createElement('div');
         notification.className = `notification notification-${type}`;
+        notification.setAttribute('data-notification-id', id);
         notification.textContent = message;
         notification.style.cssText = `
             position: fixed;
-            top: 20px;
+            top: ${topOffset}px;
             left: 50%;
             transform: translateX(-50%);
             background: ${typeColors.bg};
@@ -107,19 +165,55 @@ const UINotifications = {
             z-index: 9999;
             animation: slideDown 0.3s ease;
             box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+            transition: top 0.3s ease;
         `;
 
         document.body.appendChild(notification);
 
+        // Add to active notifications
+        this.activeNotifications.push({ id, element: notification, timestamp: Date.now() });
+
         // Remove after duration
         setTimeout(() => {
-            notification.style.animation = 'slideUp 0.3s ease';
-            setTimeout(() => {
-                if (document.body.contains(notification)) {
-                    document.body.removeChild(notification);
-                }
-            }, 300);
+            this.removeNotification(id);
         }, duration);
+    },
+
+    /**
+     * Remove a notification by ID
+     * @param {number} id - Notification ID to remove
+     */
+    removeNotification(id) {
+        const notificationIndex = this.activeNotifications.findIndex(n => n.id === id);
+        if (notificationIndex === -1) return;
+
+        const notification = this.activeNotifications[notificationIndex];
+        const element = notification.element;
+
+        // Animate out
+        element.style.animation = 'slideUp 0.3s ease';
+
+        setTimeout(() => {
+            if (document.body.contains(element)) {
+                document.body.removeChild(element);
+            }
+
+            // Remove from active notifications
+            this.activeNotifications.splice(notificationIndex, 1);
+
+            // Reposition remaining notifications
+            this.repositionNotifications();
+        }, 300);
+    },
+
+    /**
+     * Reposition active notifications to fill gaps
+     */
+    repositionNotifications() {
+        this.activeNotifications.forEach((notification, index) => {
+            const newTop = 20 + (index * 80);
+            notification.element.style.top = `${newTop}px`;
+        });
     },
 
     /**

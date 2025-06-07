@@ -328,12 +328,8 @@ const CharacterProgression = {
         // Show overlay
         this.elements.levelUpOverlay.classList.add('active');
 
-        // Auto-close after 5 seconds if not manually closed
-        setTimeout(() => {
-            if (this.elements.levelUpOverlay.classList.contains('active')) {
-                this.closeLevelUpNotification();
-            }
-        }, 5000);
+        // Level up notification now persists until player manually dismisses it
+        // No auto-close timer - player must click the continue button
     },
 
     /**

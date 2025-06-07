@@ -353,6 +353,10 @@ const UINotifications = {
         // Close on outside click
         confirmDialog.addEventListener('click', (e) => {
             if (e.target === confirmDialog) {
+                // Don't close if clicking on overlays (like level up dialog)
+                if (e.target.closest('.overlay') || e.target.closest('.level-up-overlay')) {
+                    return;
+                }
                 if (onCancel) onCancel();
                 document.body.removeChild(confirmDialog);
             }

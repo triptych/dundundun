@@ -12,7 +12,10 @@ const RoomTypes = {
     BOSS: 'boss',
     STAIRS: 'stairs',
     START: 'start',
-    STORE: 'store'
+    STORE: 'store',
+    CHEST: 'chest',
+    CAMPFIRE: 'campfire',
+    QUEST: 'quest'
 };
 
 /**
@@ -609,15 +612,31 @@ class DungeonGrid {
             rooms.splice(rooms.indexOf(bossRoom), 1);
         }
 
+        // Place campfire room (healing room) - 15% chance if enough rooms
+        if (this.roomCount >= 6 && rooms.length > 0 && Math.random() < 0.15) {
+            const campfireRoom = rooms[Math.floor(Math.random() * rooms.length)];
+            campfireRoom.type = RoomTypes.CAMPFIRE;
+            rooms.splice(rooms.indexOf(campfireRoom), 1);
+        }
+
+        // Place quest room every 5th floor starting from floor 3
+        if (this.floor >= 3 && this.floor % 5 === 0 && rooms.length > 0) {
+            const questRoom = rooms[Math.floor(Math.random() * rooms.length)];
+            questRoom.type = RoomTypes.QUEST;
+            rooms.splice(rooms.indexOf(questRoom), 1);
+        }
+
         // Assign remaining room types
         rooms.forEach(room => {
             const rand = Math.random();
-            if (rand < 0.3) {
+            if (rand < 0.25) {
                 room.type = RoomTypes.MONSTER;
-            } else if (rand < 0.5) {
+            } else if (rand < 0.4) {
                 room.type = RoomTypes.TREASURE;
+            } else if (rand < 0.55) {
+                room.type = RoomTypes.CHEST;
             }
-            // Otherwise stays EMPTY
+            // Otherwise stays EMPTY (45% chance for empty rooms)
         });
     }
 

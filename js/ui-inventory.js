@@ -305,6 +305,12 @@ const UIInventory = {
      */
     handleOutsideMenuClick(event) {
         const menu = document.getElementById('item-action-menu');
+
+        // Don't close menu if clicking on overlays (like level up dialog)
+        if (event.target.closest('.overlay') || event.target.closest('.level-up-overlay')) {
+            return;
+        }
+
         if (menu && !menu.contains(event.target)) {
             this.hideItemActionMenu();
         }

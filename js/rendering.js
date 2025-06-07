@@ -366,7 +366,10 @@ const Rendering = {
             'treasure': '#ffd93d', // Gold
             'boss': '#9c27b0',     // Purple
             'stairs': '#4caf50',   // Green
-            'store': '#ff9800'     // Orange
+            'store': '#ff9800',    // Orange
+            'chest': '#8d6e63',    // Brown
+            'campfire': '#ff5722', // Red-Orange
+            'quest': '#3f51b5'     // Indigo
         };
 
         // Draw each room

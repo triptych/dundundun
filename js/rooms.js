@@ -40,6 +40,19 @@ const Rooms = {
             case 'store':
                 this.handleStoreRoom();
                 break;
+            case 'chest':
+                if (!currentRoom.isCleared) {
+                    this.handleChestRoom(onCombatTriggered);
+                }
+                break;
+            case 'campfire':
+                this.handleCampfireRoom();
+                break;
+            case 'quest':
+                if (!currentRoom.isCleared) {
+                    this.handleQuestRoom();
+                }
+                break;
             case 'empty':
                 this.handleEmptyRoom(onCombatTriggered);
                 break;
@@ -215,6 +228,221 @@ const Rooms = {
     },
 
     /**
+     * Handle chest room events (random chance for loot, gold, or combat)
+     * @param {Function} onCombatTriggered - Callback when combat is triggered
+     */
+    handleChestRoom(onCombatTriggered = null) {
+        console.log('Found a mysterious chest!');
+
+        const floor = GameState.dungeon.currentFloor;
+        const random = Math.random();
+
+        if (random < 0.4) {
+            // 40% chance for good loot
+            const gold = Math.floor(Math.random() * 30) + (floor * 8);
+
+            // Generate items using the Items system
+            let generatedItems = [];
+            let itemsMessage = '';
+
+            if (typeof Items !== 'undefined') {
+                generatedItems = Items.generateLoot('chest', floor);
+
+                if (generatedItems.length > 0) {
+                    let itemsAdded = 0;
+
+                    for (const item of generatedItems) {
+                        if (GameState.addItem(item)) {
+                            itemsAdded++;
+                            console.log(`Added item to inventory: ${item.name} x${item.quantity}`);
+                        } else {
+                            console.log(`Inventory full, could not add: ${item.name}`);
+                            if (typeof UI !== 'undefined' && UI.showNotification) {
+                                UI.showNotification('Inventory full! Some items were lost.', 2000, 'warning');
+                            }
+                            break;
+                        }
+                    }
+
+                    if (itemsAdded > 0) {
+                        const itemNames = generatedItems.slice(0, itemsAdded).map(item =>
+                            item.quantity > 1 ? `${item.name} x${item.quantity}` : item.name
+                        ).join(', ');
+                        itemsMessage = ` and found: ${itemNames}`;
+                    }
+                }
+            }
+
+            GameState.updateInventory({ gold: GameState.inventory.gold + gold });
+
+            const message = `Chest contained ${gold} gold${itemsMessage}!`;
+            if (typeof UI !== 'undefined' && UI.showNotification) {
+                UI.showNotification(message, 3000, 'success');
+            }
+        } else if (random < 0.7) {
+            // 30% chance for just gold
+            const gold = Math.floor(Math.random() * 20) + (floor * 5);
+            GameState.updateInventory({ gold: GameState.inventory.gold + gold });
+
+            const message = `Chest contained ${gold} gold!`;
+            if (typeof UI !== 'undefined' && UI.showNotification) {
+                UI.showNotification(message, 2000, 'success');
+            }
+        } else {
+            // 30% chance for trap/combat
+            if (typeof UI !== 'undefined' && UI.showNotification) {
+                UI.showNotification('The chest was trapped! A guardian emerges!', 2000, 'warning');
+            }
+
+            if (onCombatTriggered) {
+                onCombatTriggered('chest_guardian');
+            } else if (typeof Combat !== 'undefined') {
+                Combat.triggerCombat();
+            }
+            return; // Don't mark as cleared if combat is triggered
+        }
+
+        // Mark room as cleared
+        GameState.dungeon.currentRoom.isCleared = true;
+    },
+
+    /**
+     * Handle campfire room events (healing room)
+     */
+    handleCampfireRoom() {
+        console.log('Found a warm campfire!');
+
+        // Allow player to heal at campfire
+        if (GameState.player.health < GameState.player.maxHealth) {
+            const healAmount = Math.floor(GameState.player.maxHealth * 0.5); // 50% heal
+            const newHealth = Math.min(GameState.player.maxHealth, GameState.player.health + healAmount);
+            const actualHealing = newHealth - GameState.player.health;
+
+            if (actualHealing > 0) {
+                GameState.updatePlayer({ health: newHealth });
+
+                if (typeof UI !== 'undefined' && UI.showNotification) {
+                    UI.showNotification(`Rested by the campfire and restored ${actualHealing} health`, 3000, 'success');
+                }
+            } else {
+                if (typeof UI !== 'undefined' && UI.showNotification) {
+                    UI.showNotification('You are already at full health', 2000, 'info');
+                }
+            }
+        } else {
+            if (typeof UI !== 'undefined' && UI.showNotification) {
+                UI.showNotification('The warm campfire provides comfort, but you are already at full health', 2000, 'info');
+            }
+        }
+
+        // Campfire rooms can be used multiple times (don't mark as cleared)
+    },
+
+    /**
+     * Handle quest room events
+     */
+    handleQuestRoom() {
+        console.log('Found a quest room!');
+
+        const floor = GameState.dungeon.currentFloor;
+
+        // Simple quest: choose between risk/reward options
+        const questOptions = [
+            {
+                name: 'Ancient Artifact',
+                description: 'An ancient artifact glows with mysterious energy. Touch it?',
+                riskChance: 0.3,
+                goodReward: { gold: floor * 15, exp: floor * 5 },
+                badResult: { damage: Math.floor(GameState.player.maxHealth * 0.2) }
+            },
+            {
+                name: 'Mysterious Potion',
+                description: 'A bubbling potion sits on a pedestal. Drink it?',
+                riskChance: 0.4,
+                goodReward: { healthBoost: Math.floor(GameState.player.maxHealth * 0.3) },
+                badResult: { damage: Math.floor(GameState.player.maxHealth * 0.15) }
+            },
+            {
+                name: 'Strange Shrine',
+                description: 'A shrine asks for an offering. Give 50 gold?',
+                riskChance: 0.2,
+                cost: 50,
+                goodReward: { gold: floor * 20, exp: floor * 8 },
+                badResult: { goldLoss: 50 }
+            }
+        ];
+
+        const quest = questOptions[Math.floor(Math.random() * questOptions.length)];
+
+        // Auto-accept quest for now (could be expanded with UI choices)
+        if (quest.cost && GameState.inventory.gold < quest.cost) {
+            if (typeof UI !== 'undefined' && UI.showNotification) {
+                UI.showNotification(`${quest.description} Not enough gold!`, 3000, 'warning');
+            }
+            return;
+        }
+
+        const isSuccess = Math.random() > quest.riskChance;
+
+        if (isSuccess) {
+            // Good outcome
+            let message = `${quest.name}: Success! `;
+
+            if (quest.cost) {
+                GameState.updateInventory({ gold: GameState.inventory.gold - quest.cost });
+                message += `Paid ${quest.cost} gold and `;
+            }
+
+            if (quest.goodReward.gold) {
+                GameState.updateInventory({ gold: GameState.inventory.gold + quest.goodReward.gold });
+                message += `gained ${quest.goodReward.gold} gold `;
+            }
+
+            if (quest.goodReward.exp) {
+                GameState.addExperience(quest.goodReward.exp);
+                message += `and ${quest.goodReward.exp} experience `;
+            }
+
+            if (quest.goodReward.healthBoost) {
+                const newHealth = Math.min(GameState.player.maxHealth, GameState.player.health + quest.goodReward.healthBoost);
+                const actualHealing = newHealth - GameState.player.health;
+                GameState.updatePlayer({ health: newHealth });
+                message += `and restored ${actualHealing} health `;
+            }
+
+            if (typeof UI !== 'undefined' && UI.showNotification) {
+                UI.showNotification(message + '!', 4000, 'success');
+            }
+        } else {
+            // Bad outcome
+            let message = `${quest.name}: Failed! `;
+
+            if (quest.cost) {
+                GameState.updateInventory({ gold: GameState.inventory.gold - quest.cost });
+                message += `Lost ${quest.cost} gold `;
+            }
+
+            if (quest.badResult.damage) {
+                const newHealth = Math.max(1, GameState.player.health - quest.badResult.damage);
+                GameState.updatePlayer({ health: newHealth });
+                message += `and took ${quest.badResult.damage} damage `;
+            }
+
+            if (quest.badResult.goldLoss && GameState.inventory.gold >= quest.badResult.goldLoss) {
+                GameState.updateInventory({ gold: GameState.inventory.gold - quest.badResult.goldLoss });
+                message += `and lost ${quest.badResult.goldLoss} gold `;
+            }
+
+            if (typeof UI !== 'undefined' && UI.showNotification) {
+                UI.showNotification(message + '!', 4000, 'warning');
+            }
+        }
+
+        // Mark room as cleared
+        GameState.dungeon.currentRoom.isCleared = true;
+    },
+
+    /**
      * Handle empty room events
      * @param {Function} onCombatTriggered - Callback when combat is triggered
      */
@@ -280,7 +508,10 @@ const Rooms = {
             'treasure': 'Treasure Chamber',
             'boss': 'Boss Arena',
             'stairs': 'Stairs to Next Floor',
-            'store': 'Merchant Store'
+            'store': 'Merchant Store',
+            'chest': 'Mysterious Chest',
+            'campfire': 'Healing Campfire',
+            'quest': 'Quest Room'
         };
 
         return descriptions[roomType] || 'Unknown Room';
@@ -303,14 +534,17 @@ const Rooms = {
             'treasure': '#ffd93d', // Gold
             'boss': '#9c27b0',     // Purple
             'stairs': '#4caf50',   // Green
-            'store': '#ff9800'     // Orange
+            'store': '#ff9800',    // Orange
+            'chest': '#8d6e63',    // Brown
+            'campfire': '#ff5722', // Red-Orange
+            'quest': '#3f51b5'     // Indigo
         };
 
         let color = baseColors[roomType] || '#666';
 
         // Darken color if room is cleared
-        if (isCleared && roomType !== 'start' && roomType !== 'stairs') {
-            // Convert to darker shade
+        if (isCleared && roomType !== 'start' && roomType !== 'stairs' && roomType !== 'campfire') {
+            // Convert to darker shade (campfire rooms don't get darkened since they can be reused)
             const hex = color.replace('#', '');
             const r = Math.max(0, parseInt(hex.substr(0, 2), 16) - 60);
             const g = Math.max(0, parseInt(hex.substr(2, 2), 16) - 60);
@@ -328,11 +562,14 @@ const Rooms = {
      */
     getRoomProperties(room) {
         return {
-            isSafe: room.type === 'start',
-            hasEnemies: room.type === 'monster' || room.type === 'boss',
-            hasTreasure: room.type === 'treasure',
+            isSafe: room.type === 'start' || room.type === 'campfire',
+            hasEnemies: room.type === 'monster' || room.type === 'boss' || (room.type === 'chest' && !room.isCleared),
+            hasTreasure: room.type === 'treasure' || room.type === 'chest',
             isExit: room.type === 'stairs',
-            canHeal: room.type === 'start',
+            canHeal: room.type === 'start' || room.type === 'campfire',
+            hasQuest: room.type === 'quest',
+            hasStore: room.type === 'store',
+            canReuse: room.type === 'campfire' || room.type === 'store',
             isCleared: room.isCleared || false,
             isExplored: room.isExplored || false
         };

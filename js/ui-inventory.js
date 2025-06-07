@@ -137,8 +137,9 @@ const UIInventory = {
         if (typeof GameState !== 'undefined' && GameState.player.equipment[slotType]) {
             const equippedItem = GameState.player.equipment[slotType];
 
-            // Check if inventory has space
-            if (GameState.inventory.items.length >= GameState.inventory.maxSlots) {
+            // Check if inventory has space - need to find an empty slot
+            const emptySlotIndex = GameState.inventory.items.findIndex(item => item === null);
+            if (emptySlotIndex === -1 && GameState.inventory.items.length >= GameState.inventory.maxSlots) {
                 if (typeof UINotifications !== 'undefined') {
                     UINotifications.showNotification('Inventory full! Cannot unequip item', 2000, 'error');
                 }
@@ -167,10 +168,18 @@ const UIInventory = {
 
             // Remove from equipment
             GameState.player.equipment[slotType] = null;
+
+            // Emit events to update the UI
             GameState.emit('playerUpdate', GameState.player);
+            GameState.emit('inventoryUpdate', GameState.inventory);
 
             if (typeof UINotifications !== 'undefined') {
                 UINotifications.showNotification(`Unequipped ${equippedItem.name}`, 1500, 'info');
+            }
+
+            // Save if auto-save is enabled
+            if (GameState.settings && GameState.settings.autoSave) {
+                GameState.saveGameData();
             }
         }
     },

@@ -12,6 +12,12 @@ const Combat = {
             return;
         }
 
+        // Safety check: End combat if either participant has negative or zero HP
+        if (this.shouldEndCombat()) {
+            this.handleCombatEnd();
+            return;
+        }
+
         console.log(`Combat action: ${action}`);
 
         // Process combat action
@@ -28,6 +34,9 @@ const Combat = {
             case 'item':
                 this.useItem();
                 break;
+            case 'escape':
+                this.attemptEscape(onCombatEnd);
+                return; // Don't process enemy turn if escape successful
         }
 
         // End player turn
@@ -100,6 +109,9 @@ const Combat = {
         GameState.combat.enemy.health -= finalDamage;
         GameState.combat.log.push(logMessage);
 
+        // Trigger enemy shake animation
+        this.shakeElement('.enemy-info', isCritical);
+
         if (GameState.combat.enemy.health <= 0) {
             this.endCombat(true);
         } else {
@@ -139,6 +151,9 @@ const Combat = {
         GameState.combat.cooldowns.heavyAttack = 3000; // 3 second cooldown
 
         GameState.combat.log.push(logMessage);
+
+        // Trigger enemy shake animation (intense for heavy attacks)
+        this.shakeElement('.enemy-info', true);
 
         if (GameState.combat.enemy.health <= 0) {
             this.endCombat(true);
@@ -204,11 +219,77 @@ const Combat = {
     },
 
     /**
+     * Attempt to escape from combat
+     * @param {Function} onCombatEnd - Callback for when combat ends
+     */
+    attemptEscape(onCombatEnd = null) {
+        // Calculate escape chance based on agility
+        // Base 50% chance + 2% per agility point, capped at 95%
+        const baseEscapeChance = 50;
+        const agilityBonus = GameState.player.agility * 2;
+        const escapeChance = Math.min(95, baseEscapeChance + agilityBonus);
+
+        // Boss fights have reduced escape chance
+        const isBoss = GameState.combat.enemy && GameState.combat.enemy.isBoss;
+        const finalEscapeChance = isBoss ? Math.floor(escapeChance * 0.5) : escapeChance;
+
+        const roll = Math.random() * 100;
+
+        if (roll < finalEscapeChance) {
+            // Escape successful
+            GameState.combat.log.push(`You successfully escaped! (${Math.round(finalEscapeChance)}% chance)`);
+
+            if (typeof UI !== 'undefined' && UI.showNotification) {
+                UI.showNotification('Escaped successfully!', 1500, 'info');
+            }
+
+            // End combat directly without triggering death logic
+            GameState.combat.isActive = false;
+            GameState.combat.enemy = null;
+            GameState.combat.log = [];
+
+            GameState.switchScreen('game');
+            GameState.emit('combatUpdate', GameState.combat);
+
+            // Auto-save if enabled
+            if (GameState.settings && GameState.settings.autoSave) {
+                GameState.saveGameData();
+            }
+
+            if (onCombatEnd) {
+                onCombatEnd(false);
+            }
+        } else {
+            // Escape failed
+            GameState.combat.log.push(`Failed to escape! (${Math.round(finalEscapeChance)}% chance)`);
+
+            if (typeof UI !== 'undefined' && UI.showNotification) {
+                UI.showNotification('Escape failed!', 1500, 'warning');
+            }
+
+            // End player turn and let enemy attack
+            GameState.combat.playerTurn = false;
+            GameState.emit('combatUpdate', GameState.combat);
+
+            // Process enemy turn after a delay
+            setTimeout(() => {
+                this.processEnemyTurn(onCombatEnd);
+            }, 1000);
+        }
+    },
+
+    /**
      * Process enemy turn
      * @param {Function} onCombatEnd - Callback for when combat ends
      */
     processEnemyTurn(onCombatEnd = null) {
         if (!GameState.combat.isActive || !GameState.combat.enemy) return;
+
+        // Safety check: End combat if either participant has negative or zero HP
+        if (this.shouldEndCombat()) {
+            this.handleCombatEnd();
+            return;
+        }
 
         const enemyDamage = GameState.combat.enemy.attack + Utils.randomInt(1, 4);
         let actualDamage = enemyDamage;
@@ -230,6 +311,11 @@ const Combat = {
         }
 
         GameState.updatePlayer({ health: GameState.player.health - actualDamage });
+
+        // Trigger player shake animation if damage was taken
+        if (actualDamage > 0) {
+            this.shakeElement('.player-combat-info', actualDamage >= 15); // Intense shake for high damage
+        }
 
         // Check if player died
         if (GameState.player.health <= 0) {
@@ -447,6 +533,74 @@ const Combat = {
             critChance: this.calculateCritChance(),
             damageReduction: Math.min(50, GameState.player.vitality * 2)
         };
+    },
+
+    /**
+     * Shake an element to indicate damage
+     * @param {string} selector - CSS selector for the element to shake
+     * @param {boolean} intense - Whether to use intense shake animation
+     */
+    shakeElement(selector, intense = false) {
+        const element = document.querySelector(selector);
+        if (!element) return;
+
+        // Remove any existing shake classes
+        element.classList.remove('shake', 'shake-intense');
+
+        // Add appropriate shake class
+        const shakeClass = intense ? 'shake-intense' : 'shake';
+        element.classList.add(shakeClass);
+
+        // Remove the class after animation completes
+        const animationDuration = intense ? 800 : 600; // Match CSS animation duration
+        setTimeout(() => {
+            element.classList.remove(shakeClass);
+        }, animationDuration);
+    },
+
+    /**
+     * Check if combat should end due to negative HP
+     * @returns {boolean} True if combat should end
+     */
+    shouldEndCombat() {
+        // Check if player is dead or has negative health
+        if (GameState.player.health <= 0) {
+            console.log('Combat should end: Player health is', GameState.player.health);
+            return true;
+        }
+
+        // Check if enemy is dead or has negative health
+        if (GameState.combat.enemy && GameState.combat.enemy.health <= 0) {
+            console.log('Combat should end: Enemy health is', GameState.combat.enemy.health);
+            return true;
+        }
+
+        return false;
+    },
+
+    /**
+     * Handle combat end with appropriate outcome
+     */
+    handleCombatEnd() {
+        console.log('Handling combat end due to safety check');
+
+        // Determine outcome based on HP
+        let playerWon = false;
+
+        if (GameState.combat.enemy && GameState.combat.enemy.health <= 0) {
+            playerWon = true;
+            console.log('Player won - enemy defeated');
+        } else if (GameState.player.health <= 0) {
+            playerWon = false;
+            console.log('Player lost - player defeated');
+        } else {
+            // Fallback - shouldn't happen but handle gracefully
+            console.log('Combat ended for unknown reason, defaulting to player loss');
+            playerWon = false;
+        }
+
+        // Force end combat
+        this.endCombat(playerWon);
     }
 };
 

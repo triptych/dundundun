@@ -41,6 +41,22 @@
     font-size: 1.5em;
 }
 
+.store-header-info {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+}
+
+.player-gold {
+    font-size: 1.2em;
+    font-weight: bold;
+    color: #ffd54f;
+    background: rgba(255, 213, 79, 0.1);
+    padding: 5px 10px;
+    border-radius: 5px;
+    border: 1px solid rgba(255, 213, 79, 0.3);
+}
+
 .store-close-btn {
     background: #f44336;
     color: white;

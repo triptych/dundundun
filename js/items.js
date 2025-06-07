@@ -483,22 +483,39 @@ const Items = {
         const equipSlot = item.type === 'weapon' ? 'weapon' :
                          item.type === 'armor' ? 'armor' : 'accessory';
 
-        // Unequip current item if any
+        // Get the currently equipped item
         const currentEquipped = GameState.player.equipment[equipSlot];
+
+        // If there's already an item equipped, we need to swap them
         if (currentEquipped) {
-            // Add current equipped item back to inventory
-            if (!GameState.addItem(currentEquipped)) {
-                if (typeof UI !== 'undefined' && UI.showNotification) {
-                    UI.showNotification('Inventory full! Cannot unequip current item', 2000, 'error');
+            // Remove old item's stat bonuses first
+            if (currentEquipped.stats) {
+                const updates = {};
+                for (const [stat, value] of Object.entries(currentEquipped.stats)) {
+                    if (stat === 'maxHealth') {
+                        updates.maxHealth = GameState.player.maxHealth - value;
+                        // Adjust current health if it exceeds new max
+                        updates.health = Math.min(GameState.player.health, updates.maxHealth);
+                    } else if (GameState.player.hasOwnProperty(stat)) {
+                        updates[stat] = GameState.player[stat] - value;
+                    }
                 }
-                return false;
+                if (Object.keys(updates).length > 0) {
+                    GameState.updatePlayer(updates);
+                }
             }
+
+            // Replace the item in the inventory slot with the currently equipped item
+            GameState.inventory.items[slotIndex] = { ...currentEquipped };
+        } else {
+            // No item equipped, so just remove the new item from inventory
+            GameState.removeItem(slotIndex);
         }
 
-        // Equip new item
+        // Equip the new item
         GameState.player.equipment[equipSlot] = { ...item };
 
-        // Apply stat bonuses
+        // Apply new item's stat bonuses
         if (item.stats) {
             const updates = {};
             for (const [stat, value] of Object.entries(item.stats)) {
@@ -515,11 +532,21 @@ const Items = {
             }
         }
 
-        // Remove from inventory
-        GameState.removeItem(slotIndex);
+        // Emit events to update the UI
+        GameState.emit('playerUpdate', GameState.player);
+        GameState.emit('inventoryUpdate', GameState.inventory);
 
         if (typeof UI !== 'undefined' && UI.showNotification) {
-            UI.showNotification(`Equipped ${item.name}`, 1500, 'success');
+            if (currentEquipped) {
+                UI.showNotification(`Equipped ${item.name}, unequipped ${currentEquipped.name}`, 1500, 'success');
+            } else {
+                UI.showNotification(`Equipped ${item.name}`, 1500, 'success');
+            }
+        }
+
+        // Save if auto-save is enabled
+        if (GameState.settings && GameState.settings.autoSave) {
+            GameState.saveGameData();
         }
 
         return true;

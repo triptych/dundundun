@@ -1374,29 +1374,49 @@ const GameState = {
                 // Check if combat was active when saved and restore combat screen
                 if (this.combat.isActive && this.combat.enemy) {
                     console.log('Restoring combat state after page reload');
-                    this.current.screen = 'combat';
 
-                    // Emit combat update to restore the combat UI with more robust restoration
-                    setTimeout(() => {
-                        console.log('Restoring combat UI with enemy:', this.combat.enemy);
+                    // Safety check: Validate combat state on reload
+                    const playerDead = this.player.health <= 0;
+                    const enemyDead = this.combat.enemy.health <= 0;
 
-                        // Make sure the combat overlay is visible
-                        const combatOverlay = document.getElementById('combat-overlay');
-                        if (combatOverlay) {
-                            combatOverlay.classList.add('active');
-                        }
-
-                        // Emit the combat update event
-                        this.emit('combatUpdate', this.combat);
-
-                        // Also emit a screen change event to ensure proper UI state
-                        this.emit('stateChange', {
-                            type: 'screenChange',
-                            from: 'loading',
-                            to: 'combat',
-                            state: this.current
+                    if (playerDead || enemyDead) {
+                        console.log('Combat state invalid on reload - ending combat', {
+                            playerHealth: this.player.health,
+                            enemyHealth: this.combat.enemy.health
                         });
-                    }, 200);
+
+                        // Determine winner and end combat immediately
+                        const playerWon = enemyDead && !playerDead;
+                        this.endCombat(playerWon);
+
+                        // Don't restore combat UI
+                        this.current.screen = 'game';
+                    } else {
+                        // Valid combat state - restore UI
+                        this.current.screen = 'combat';
+
+                        // Emit combat update to restore the combat UI with more robust restoration
+                        setTimeout(() => {
+                            console.log('Restoring combat UI with enemy:', this.combat.enemy);
+
+                            // Make sure the combat overlay is visible
+                            const combatOverlay = document.getElementById('combat-overlay');
+                            if (combatOverlay) {
+                                combatOverlay.classList.add('active');
+                            }
+
+                            // Emit the combat update event
+                            this.emit('combatUpdate', this.combat);
+
+                            // Also emit a screen change event to ensure proper UI state
+                            this.emit('stateChange', {
+                                type: 'screenChange',
+                                from: 'loading',
+                                to: 'combat',
+                                state: this.current
+                            });
+                        }, 200);
+                    }
                 }
             }
 

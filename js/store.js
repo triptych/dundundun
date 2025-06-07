@@ -329,7 +329,10 @@ const Store = {
             <div class="store-container">
                 <div class="store-header">
                     <h2>🏪 Merchant Store</h2>
-                    <button class="store-close-btn" onclick="Store.closeStore()">✕</button>
+                    <div class="store-header-info">
+                        <div class="player-gold">Gold: ${GameState.inventory.gold}</div>
+                        <button class="store-close-btn" onclick="Store.closeStore()">✕</button>
+                    </div>
                 </div>
 
                 <div class="store-tabs">

@@ -217,6 +217,32 @@ const UINotifications = {
     },
 
     /**
+     * Dismiss all active notifications immediately
+     */
+    dismissAllNotifications() {
+        // Clear the notification queue to prevent new ones from showing
+        this.notificationQueue = [];
+
+        // Remove all active notifications
+        const notificationsToRemove = [...this.activeNotifications]; // Create a copy to avoid modification during iteration
+
+        notificationsToRemove.forEach(notification => {
+            const element = notification.element;
+
+            // Remove immediately without animation for clean panel switching
+            if (document.body.contains(element)) {
+                document.body.removeChild(element);
+            }
+        });
+
+        // Clear the active notifications array
+        this.activeNotifications = [];
+
+        // Reset processing queue flag
+        this.processingQueue = false;
+    },
+
+    /**
      * Show a subtle save indicator for auto-saves
      */
     showSaveIndicator() {

@@ -15,7 +15,8 @@ const RoomTypes = {
     STORE: 'store',
     CHEST: 'chest',
     CAMPFIRE: 'campfire',
-    QUEST: 'quest'
+    QUEST: 'quest',
+    NPC: 'npc'
 };
 
 /**
@@ -626,6 +627,13 @@ class DungeonGrid {
             rooms.splice(rooms.indexOf(questRoom), 1);
         }
 
+        // Place NPC room - 20% chance if enough rooms and starting from floor 2
+        if (this.floor >= 2 && this.roomCount >= 5 && rooms.length > 0 && Math.random() < 0.2) {
+            const npcRoom = rooms[Math.floor(Math.random() * rooms.length)];
+            npcRoom.type = RoomTypes.NPC;
+            rooms.splice(rooms.indexOf(npcRoom), 1);
+        }
+
         // Assign remaining room types
         rooms.forEach(room => {
             const rand = Math.random();
@@ -815,6 +823,11 @@ const GameState = {
         itemsFound: 0,
         deathCount: 0,
         achievements: []
+    },
+
+    // Lore tracking
+    lore: {
+        conversations: [] // Array of {npcName, avatar, dialog, floor, timestamp}
     },
 
     // Event listeners for state changes
@@ -1308,7 +1321,8 @@ const GameState = {
                 dungeon: dungeonSaveData,
                 inventory: this.inventory,
                 combat: this.combat,
-                current: this.current
+                current: this.current,
+                lore: this.lore
             };
 
             Storage.Game.saveState(gameState);
@@ -1348,6 +1362,7 @@ const GameState = {
                 if (savedState.inventory) Object.assign(this.inventory, savedState.inventory);
                 if (savedState.combat) Object.assign(this.combat, savedState.combat);
                 if (savedState.current) Object.assign(this.current, savedState.current);
+                if (savedState.lore) Object.assign(this.lore, savedState.lore);
 
                 // Reconstruct dungeon state
                 if (savedState.dungeon) {
@@ -1494,6 +1509,36 @@ const GameState = {
         } else {
             console.warn(`No listeners registered for event: ${event}`);
         }
+    },
+
+    /**
+     * Add a conversation to the lore tracking
+     * @param {string} npcName - Name of the NPC
+     * @param {string} avatar - NPC avatar emoji
+     * @param {string} dialog - Full conversation dialog
+     */
+    addLoreConversation(npcName, avatar, dialog) {
+        // Initialize lore if it doesn't exist
+        if (!this.lore) {
+            this.lore = { conversations: [] };
+        }
+
+        const conversation = {
+            npcName,
+            avatar,
+            dialog,
+            floor: this.dungeon.currentFloor,
+            timestamp: Date.now()
+        };
+
+        this.lore.conversations.push(conversation);
+
+        // Auto-save if enabled
+        if (this.settings.autoSave) {
+            this.saveGameData();
+        }
+
+        console.log('Added conversation to lore:', npcName);
     },
 
     /**

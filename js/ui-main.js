@@ -71,6 +71,11 @@ const UI = {
      * @param {string} screenName - Name of screen to show
      */
     switchScreen(screenName) {
+        // Dismiss all notifications before switching screens
+        if (this.modules.notifications && this.modules.notifications.dismissAllNotifications) {
+            this.modules.notifications.dismissAllNotifications();
+        }
+
         if (this.modules.core) {
             this.modules.core.switchScreen(screenName);
         }
@@ -81,6 +86,11 @@ const UI = {
      * @param {string} tabName - Name of tab to activate
      */
     switchTab(tabName) {
+        // Dismiss all notifications before switching tabs
+        if (this.modules.notifications && this.modules.notifications.dismissAllNotifications) {
+            this.modules.notifications.dismissAllNotifications();
+        }
+
         if (this.modules.navigation) {
             this.modules.navigation.switchTab(tabName);
         }

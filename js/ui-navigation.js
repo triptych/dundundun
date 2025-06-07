@@ -65,6 +65,11 @@ const UINavigation = {
      * @param {string} tabName - Name of tab to activate
      */
     switchTab(tabName) {
+        // Dismiss all notifications before switching panels
+        if (typeof UINotifications !== 'undefined' && UINotifications.dismissAllNotifications) {
+            UINotifications.dismissAllNotifications();
+        }
+
         // Update navigation button states
         UICore.elements.navBtns.forEach(btn => {
             if (btn.dataset.tab === tabName) {

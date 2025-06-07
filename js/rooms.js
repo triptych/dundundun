@@ -53,6 +53,9 @@ const Rooms = {
                     this.handleQuestRoom();
                 }
                 break;
+            case 'npc':
+                this.handleNPCRoom();
+                break;
             case 'empty':
                 this.handleEmptyRoom(onCombatTriggered);
                 break;
@@ -339,6 +342,31 @@ const Rooms = {
     },
 
     /**
+     * Handle NPC room events
+     */
+    handleNPCRoom() {
+        console.log('Found an NPC!');
+
+        // Check if we already have an NPC in this room
+        if (GameState.dungeon.currentRoom.data.npc) {
+            // Re-encounter with existing NPC
+            if (typeof NPCSystem !== 'undefined') {
+                NPCSystem.showNPCDialog(GameState.dungeon.currentRoom.data.npc);
+            }
+        } else {
+            // New NPC encounter
+            if (typeof NPCSystem !== 'undefined') {
+                NPCSystem.handleNPCRoom();
+            } else {
+                console.warn('NPCSystem not available');
+                if (typeof UI !== 'undefined' && UI.showNotification) {
+                    UI.showNotification('You encounter a mysterious figure, but they vanish before you can speak.', 3000, 'info');
+                }
+            }
+        }
+    },
+
+    /**
      * Handle quest room events
      */
     handleQuestRoom() {
@@ -511,7 +539,8 @@ const Rooms = {
             'store': 'Merchant Store',
             'chest': 'Mysterious Chest',
             'campfire': 'Healing Campfire',
-            'quest': 'Quest Room'
+            'quest': 'Quest Room',
+            'npc': 'Friendly Encounter'
         };
 
         return descriptions[roomType] || 'Unknown Room';

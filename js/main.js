@@ -29,6 +29,7 @@ import EquipmentUpgrade from './equipment-upgrade.js';
 // New UI systems
 import SplashScreen from './splash-screen.js';
 import SettingsPanel from './settings-panel.js';
+import NPCSystem from './npc-system.js';
 
 // Other game systems
 import Rendering from './rendering.js';
@@ -71,6 +72,7 @@ window.EquipmentUpgrade = EquipmentUpgrade;
 // Make new UI systems globally available for compatibility
 window.SplashScreen = SplashScreen;
 window.SettingsPanel = SettingsPanel;
+window.NPCSystem = NPCSystem;
 
 // Make other game systems globally available for compatibility
 window.Rendering = Rendering;
@@ -95,6 +97,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
         // Initialize settings panel
         SettingsPanel.init();
+
+        // Initialize NPC system
+        NPCSystem.init();
 
         console.log('Main modules loaded successfully');
     } catch (error) {

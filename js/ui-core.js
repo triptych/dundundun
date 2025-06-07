@@ -217,6 +217,11 @@ const UICore = {
      * @param {string} screenName - Name of screen to show
      */
     switchScreen(screenName) {
+        // Dismiss all notifications before switching screens
+        if (typeof UINotifications !== 'undefined' && UINotifications.dismissAllNotifications) {
+            UINotifications.dismissAllNotifications();
+        }
+
         // Hide all screens
         const screens = document.querySelectorAll('.screen');
         screens.forEach(screen => screen.classList.remove('active'));

@@ -19,6 +19,7 @@
             <div id="splash-screen" class="splash-screen">
                 <div class="splash-content">
                     <div class="splash-logo">Dun Dun Dungeon</div>
+                    <div class="splash-sword">⚔️</div>
                     <div class="splash-subtitle">Epic Adventures Await</div>
                     <div class="splash-loading">
                         <div class="splash-spinner"></div>
@@ -328,6 +329,14 @@
                             </div>
                         </div>
 
+                        <!-- Lore Section -->
+                        <div class="lore-section">
+                            <h4>Lore</h4>
+                            <div class="lore-list" id="lore-list">
+                                <div class="lore-empty">No conversations discovered</div>
+                            </div>
+                        </div>
+
                         <!-- Quests Section -->
                         <div class="quests-section">
                             <h4>Quests</h4>
@@ -428,6 +437,20 @@
                         </div>
                     </div>
                     <button class="level-up-continue" id="level-up-continue">Continue</button>
+                </div>
+            </div>
+
+            <!-- NPC Dialog Overlay -->
+            <div id="npc-dialog-overlay" class="overlay npc-dialog-overlay" style="display: none;">
+                <div class="npc-dialog-content">
+                    <div class="npc-avatar">
+                        <div class="npc-emoji" id="npc-emoji">🧙</div>
+                    </div>
+                    <div class="npc-dialog-box">
+                        <div class="npc-name" id="npc-name">Mysterious Stranger</div>
+                        <div class="npc-text" id="npc-text">Welcome, traveler! What brings you to these depths?</div>
+                        <button class="npc-continue-btn" id="npc-continue-btn">Continue</button>
+                    </div>
                 </div>
             </div>
 

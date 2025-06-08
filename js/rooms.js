@@ -56,6 +56,16 @@ const Rooms = {
             case 'npc':
                 this.handleNPCRoom();
                 break;
+            case 'boss_monster':
+                if (!currentRoom.isCleared) {
+                    this.handleBossMonsterRoom(onCombatTriggered);
+                }
+                break;
+            case 'epic_boss':
+                if (!currentRoom.isCleared) {
+                    this.handleEpicBossRoom(onCombatTriggered);
+                }
+                break;
             case 'empty':
                 this.handleEmptyRoom(onCombatTriggered);
                 break;
@@ -367,6 +377,300 @@ const Rooms = {
     },
 
     /**
+     * Handle boss monster room encounters (Epic Loot floors 100, 200, 300)
+     * @param {Function} onCombatTriggered - Callback when combat is triggered
+     */
+    handleBossMonsterRoom(onCombatTriggered = null) {
+        const floor = GameState.dungeon.currentRoom.data.epicLootFloor || GameState.dungeon.currentFloor;
+        console.log(`Boss Monster room encounter on floor ${floor}!`);
+
+        if (typeof UI !== 'undefined' && UI.showNotification) {
+            UI.showNotification(`You face the floor ${floor} Boss Monster! Defeat it for Epic Loot!`, 4000, 'warning');
+        }
+
+        // Generate boss monster based on floor
+        const bossMonster = this.generateBossMonster(floor);
+
+        if (onCombatTriggered) {
+            onCombatTriggered('boss_monster', bossMonster);
+        } else if (typeof Combat !== 'undefined') {
+            Combat.triggerBossCombat(bossMonster);
+        }
+    },
+
+    /**
+     * Handle epic boss room encounters (final boss when all Epic Loots collected)
+     * @param {Function} onCombatTriggered - Callback when combat is triggered
+     */
+    handleEpicBossRoom(onCombatTriggered = null) {
+        console.log('Epic Boss room encounter!');
+
+        if (typeof UI !== 'undefined' && UI.showNotification) {
+            UI.showNotification('The ultimate challenge awaits! Face the Epic Boss!', 4000, 'error');
+        }
+
+        // Generate the epic boss
+        const epicBoss = this.generateEpicBoss();
+
+        if (onCombatTriggered) {
+            onCombatTriggered('epic_boss', epicBoss);
+        } else if (typeof Combat !== 'undefined') {
+            Combat.triggerBossCombat(epicBoss);
+        }
+    },
+
+    /**
+     * Generate a boss monster for Epic Loot floors
+     * @param {number} floor - Floor number (100, 200, or 300)
+     * @returns {Object} Boss monster data
+     */
+    generateBossMonster(floor) {
+        const bossMonsters = {
+            100: {
+                name: 'Guardian of the First Epic',
+                health: 500,
+                maxHealth: 500,
+                attack: 35,
+                experience: 200,
+                isBoss: true,
+                isBossMonster: true,
+                epicLootFloor: 100,
+                description: 'A massive armored guardian wielding ancient power'
+            },
+            200: {
+                name: 'Keeper of the Second Epic',
+                health: 800,
+                maxHealth: 800,
+                attack: 50,
+                experience: 300,
+                isBoss: true,
+                isBossMonster: true,
+                epicLootFloor: 200,
+                description: 'A dark sorcerer surrounded by swirling magical energy'
+            },
+            300: {
+                name: 'Sentinel of the Final Epic',
+                health: 1200,
+                maxHealth: 1200,
+                attack: 65,
+                experience: 500,
+                isBoss: true,
+                isBossMonster: true,
+                epicLootFloor: 300,
+                description: 'A colossal dragon wreathed in elemental fury'
+            }
+        };
+
+        return bossMonsters[floor] || bossMonsters[100];
+    },
+
+    /**
+     * Generate the epic boss (final boss fight)
+     * @returns {Object} Epic boss data
+     */
+    generateEpicBoss() {
+        return {
+            name: 'The Eternal Overlord',
+            health: 2000,
+            maxHealth: 2000,
+            attack: 80,
+            experience: 1000,
+            isBoss: true,
+            isEpicBoss: true,
+            description: 'The ultimate evil that has ruled these depths for millennia'
+        };
+    },
+
+    /**
+     * Handle Epic Loot reward after defeating boss monster
+     * @param {number} floor - Floor number where boss was defeated
+     */
+    handleEpicLootReward(floor) {
+        console.log(`Handling Epic Loot reward for floor ${floor}`);
+
+        // Determine available Epic Loot options
+        const availableLoots = [];
+
+        if (!GameState.player.epicLoot.weapon) {
+            availableLoots.push({
+                type: 'weapon',
+                id: 'epic_weapon_excalibur',
+                name: 'Excalibur',
+                description: 'The legendary sword of legends'
+            });
+        }
+
+        if (!GameState.player.epicLoot.armor) {
+            availableLoots.push({
+                type: 'armor',
+                id: 'epic_armor_aegis',
+                name: 'Aegis of the Titans',
+                description: 'Divine armor forged by the gods'
+            });
+        }
+
+        if (!GameState.player.epicLoot.accessory) {
+            availableLoots.push({
+                type: 'accessory',
+                id: 'epic_accessory_omnipotence',
+                name: 'Ring of Omnipotence',
+                description: 'A ring that grants mastery over all abilities'
+            });
+        }
+
+        if (availableLoots.length === 0) {
+            console.warn('No Epic Loot available - player already has all items');
+            return;
+        }
+
+        // For now, randomly select one of the available Epic Loots
+        // TODO: In a full implementation, show a choice UI to the player
+        const selectedLoot = availableLoots[Math.floor(Math.random() * availableLoots.length)];
+
+        // Create the Epic Loot item
+        if (typeof Items !== 'undefined') {
+            const epicItem = Items.createItem(selectedLoot.id);
+            if (epicItem && GameState.addItem(epicItem)) {
+                // Mark this Epic Loot as obtained
+                GameState.player.epicLoot[selectedLoot.type] = true;
+
+                // Show notification
+                if (typeof UI !== 'undefined' && UI.showNotification) {
+                    UI.showNotification(`Epic Loot Obtained: ${selectedLoot.name}!`, 5000, 'success');
+                }
+
+                console.log(`Player obtained Epic Loot: ${selectedLoot.name}`);
+
+                // Check if all Epic Loots are collected
+                this.checkForEpicBossUnlock();
+            }
+        }
+    },
+
+    /**
+     * Check if all Epic Loots are collected and trigger Epic Boss if so
+     */
+    checkForEpicBossUnlock() {
+        const { weapon, armor, accessory } = GameState.player.epicLoot;
+
+        if (weapon && armor && accessory) {
+            console.log('All Epic Loots collected! Triggering Epic Boss fight!');
+
+            // Show dramatic notification
+            if (typeof UI !== 'undefined' && UI.showNotification) {
+                UI.showNotification('ALL EPIC LOOTS COLLECTED! The final challenge awaits...', 6000, 'error');
+            }
+
+            // Create Epic Boss room in place of current room
+            setTimeout(() => {
+                if (GameState.dungeon.currentRoom) {
+                    GameState.dungeon.currentRoom.type = 'epic_boss';
+                    GameState.dungeon.currentRoom.isCleared = false;
+
+                    // Trigger Epic Boss encounter
+                    this.handleEpicBossRoom();
+                }
+            }, 3000);
+        }
+    },
+
+    /**
+     * Handle Epic Boss victory and end game
+     */
+    handleEpicBossVictory() {
+        console.log('Epic Boss defeated! Game won!');
+
+        // Show victory notification
+        if (typeof UI !== 'undefined' && UI.showNotification) {
+            UI.showNotification('VICTORY! You have conquered the dungeon!', 8000, 'success');
+        }
+
+        // Show end credits
+        setTimeout(() => {
+            this.showEndCredits();
+        }, 3000);
+    },
+
+    /**
+     * Show end credits with creator name
+     */
+    showEndCredits() {
+        console.log('Showing end credits');
+
+        // Create credits overlay
+        const creditsOverlay = document.createElement('div');
+        creditsOverlay.id = 'end-credits';
+        creditsOverlay.style.cssText = `
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(45deg, #000428, #004e92);
+            color: #fff;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 10000;
+            font-family: Arial, sans-serif;
+            text-align: center;
+            animation: fadeIn 2s ease-in;
+        `;
+
+        creditsOverlay.innerHTML = `
+            <h1 style="font-size: 3em; margin-bottom: 1em; text-shadow: 2px 2px 4px rgba(0,0,0,0.5);">
+                🎉 CONGRATULATIONS! 🎉
+            </h1>
+            <h2 style="font-size: 2em; margin-bottom: 2em;">
+                You have conquered the Pocket Dungeon!
+            </h2>
+            <div style="font-size: 1.5em; margin-bottom: 3em;">
+                <p>Created by</p>
+                <p style="font-size: 2em; font-weight: bold; color: #ffd700; text-shadow: 2px 2px 4px rgba(0,0,0,0.5);">
+                    Andrew Wooldridge
+                </p>
+            </div>
+            <button id="new-game-btn" style="
+                font-size: 1.2em;
+                padding: 15px 30px;
+                background: #ffd700;
+                color: #000;
+                border: none;
+                border-radius: 10px;
+                cursor: pointer;
+                font-weight: bold;
+                box-shadow: 0 4px 8px rgba(0,0,0,0.3);
+                transition: transform 0.2s;
+            ">
+                Start New Game
+            </button>
+        `;
+
+        // Add CSS animation
+        const style = document.createElement('style');
+        style.textContent = `
+            @keyframes fadeIn {
+                from { opacity: 0; }
+                to { opacity: 1; }
+            }
+            #new-game-btn:hover {
+                transform: scale(1.05);
+            }
+        `;
+        document.head.appendChild(style);
+
+        document.body.appendChild(creditsOverlay);
+
+        // Add new game button functionality
+        document.getElementById('new-game-btn').addEventListener('click', () => {
+            document.body.removeChild(creditsOverlay);
+            document.head.removeChild(style);
+            GameState.newGame();
+        });
+    },
+
+    /**
      * Handle quest room events
      */
     handleQuestRoom() {
@@ -540,7 +844,9 @@ const Rooms = {
             'chest': 'Mysterious Chest',
             'campfire': 'Healing Campfire',
             'quest': 'Quest Room',
-            'npc': 'Friendly Encounter'
+            'npc': 'Friendly Encounter',
+            'boss_monster': 'Epic Loot Boss',
+            'epic_boss': 'Epic Boss Arena'
         };
 
         return descriptions[roomType] || 'Unknown Room';

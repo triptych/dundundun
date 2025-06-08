@@ -364,6 +364,28 @@ const Combat = {
                 });
 
                 GameState.combat.log.push(`Victory! Gained ${exp} experience and ${gold} gold!`);
+
+                // Handle special boss rewards
+                if (GameState.combat.enemy.isBossMonster) {
+                    // Epic Loot Boss Monster defeated
+                    const floor = GameState.combat.enemy.epicLootFloor;
+                    console.log(`Boss Monster defeated on floor ${floor}!`);
+
+                    setTimeout(() => {
+                        if (typeof Rooms !== 'undefined') {
+                            Rooms.handleEpicLootReward(floor);
+                        }
+                    }, 2000);
+                } else if (GameState.combat.enemy.isEpicBoss) {
+                    // Epic Boss defeated - game won!
+                    console.log('Epic Boss defeated! Game completed!');
+
+                    setTimeout(() => {
+                        if (typeof Rooms !== 'undefined') {
+                            Rooms.handleEpicBossVictory();
+                        }
+                    }, 2000);
+                }
             }
 
             if (typeof UI !== 'undefined' && UI.showNotification) {

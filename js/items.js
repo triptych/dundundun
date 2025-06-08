@@ -190,6 +190,57 @@ const Items = {
             }
         },
 
+        // Epic Loots - Special boss rewards
+        'epic_weapon_excalibur': {
+            id: 'epic_weapon_excalibur',
+            name: 'Excalibur',
+            type: 'weapon',
+            rarity: 'epic',
+            description: 'The legendary sword of legends. +50 Attack Power, +25% Crit Chance, +10 Strength',
+            icon: '⚡',
+            stackable: false,
+            value: 10000,
+            isEpicLoot: true,
+            stats: {
+                attackPower: 50,
+                critChance: 25,
+                strength: 10
+            }
+        },
+        'epic_armor_aegis': {
+            id: 'epic_armor_aegis',
+            name: 'Aegis of the Titans',
+            type: 'armor',
+            rarity: 'epic',
+            description: 'Divine armor forged by the gods. +100 Max Health, +15 Vitality, +20% Damage Reduction',
+            icon: '🛡️',
+            stackable: false,
+            value: 10000,
+            isEpicLoot: true,
+            stats: {
+                maxHealth: 100,
+                vitality: 15,
+                damageReduction: 20
+            }
+        },
+        'epic_accessory_omnipotence': {
+            id: 'epic_accessory_omnipotence',
+            name: 'Ring of Omnipotence',
+            type: 'accessory',
+            rarity: 'epic',
+            description: 'A ring that grants mastery over all abilities. +10 All Stats, +30% Crit Chance',
+            icon: '💫',
+            stackable: false,
+            value: 10000,
+            isEpicLoot: true,
+            stats: {
+                strength: 10,
+                agility: 10,
+                vitality: 10,
+                critChance: 30
+            }
+        },
+
         // Materials/Treasures
         'gold_coin': {
             id: 'gold_coin',

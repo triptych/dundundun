@@ -16,7 +16,9 @@ const RoomTypes = {
     CHEST: 'chest',
     CAMPFIRE: 'campfire',
     QUEST: 'quest',
-    NPC: 'npc'
+    NPC: 'npc',
+    BOSS_MONSTER: 'boss_monster',
+    EPIC_BOSS: 'epic_boss'
 };
 
 /**
@@ -590,12 +592,24 @@ class DungeonGrid {
 
         if (rooms.length === 0) return;
 
-        // Place stairs room (furthest from start)
-        const stairsRoom = this.getFurthestRoom();
-        if (stairsRoom) {
-            stairsRoom.type = RoomTypes.STAIRS;
-            this.stairsPosition = { x: stairsRoom.x, y: stairsRoom.y };
-            rooms.splice(rooms.indexOf(stairsRoom), 1);
+        // Special floors for Epic Loot Boss Monsters
+        if (this.floor === 100 || this.floor === 200 || this.floor === 300) {
+            // For boss monster floors, replace stairs with boss monster room
+            const bossMonsterRoom = this.getFurthestRoom();
+            if (bossMonsterRoom) {
+                bossMonsterRoom.type = RoomTypes.BOSS_MONSTER;
+                bossMonsterRoom.data.epicLootFloor = this.floor;
+                this.bossPosition = { x: bossMonsterRoom.x, y: bossMonsterRoom.y };
+                rooms.splice(rooms.indexOf(bossMonsterRoom), 1);
+            }
+        } else {
+            // Place stairs room (furthest from start)
+            const stairsRoom = this.getFurthestRoom();
+            if (stairsRoom) {
+                stairsRoom.type = RoomTypes.STAIRS;
+                this.stairsPosition = { x: stairsRoom.x, y: stairsRoom.y };
+                rooms.splice(rooms.indexOf(stairsRoom), 1);
+            }
         }
 
         // Place store room on every 10th floor
@@ -605,8 +619,8 @@ class DungeonGrid {
             rooms.splice(rooms.indexOf(storeRoom), 1);
         }
 
-        // Place boss room if enough rooms (at least 7 rooms total)
-        if (this.roomCount >= 7 && rooms.length > 0) {
+        // Place boss room if enough rooms (at least 7 rooms total) and not a special epic floor
+        if (this.roomCount >= 7 && rooms.length > 0 && ![100, 200, 300].includes(this.floor)) {
             const bossRoom = rooms[Math.floor(Math.random() * rooms.length)];
             bossRoom.type = RoomTypes.BOSS;
             this.bossPosition = { x: bossRoom.x, y: bossRoom.y };
@@ -769,7 +783,12 @@ const GameState = {
             armor: null,
             accessory: null
         },
-        abilities: {}
+        abilities: {},
+        epicLoot: {
+            weapon: false,
+            armor: false,
+            accessory: false
+        }
     },
 
     // Dungeon state with room grid system
@@ -884,6 +903,11 @@ const GameState = {
                 weapon: null,
                 armor: null,
                 accessory: null
+            },
+            epicLoot: {
+                weapon: false,
+                armor: false,
+                accessory: false
             }
         };
 

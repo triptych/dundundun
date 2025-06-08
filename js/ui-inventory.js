@@ -314,7 +314,10 @@ const UIInventory = {
         const menu = document.getElementById('item-action-menu');
 
         // Don't close menu if clicking on overlays (like level up dialog)
-        if (event.target.closest('.overlay') || event.target.closest('.level-up-overlay')) {
+        if (event.target.closest('.overlay') ||
+            event.target.closest('.level-up-overlay') ||
+            event.target.closest('#level-up-overlay') ||
+            event.target.closest('.level-up-content')) {
             return;
         }
 

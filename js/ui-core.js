@@ -47,6 +47,7 @@ const UICore = {
             loadingScreen: document.getElementById('loading-screen'),
             gameScreen: document.getElementById('game-screen'),
             menuScreen: document.getElementById('menu-screen'),
+            helpScreen: document.getElementById('help-screen'),
 
             // Game canvas and container
             gameCanvas: document.getElementById('game-canvas'),

@@ -2,7 +2,7 @@
 <html lang="en">
     <head>
         <meta charset="UTF-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
         <meta name="theme-color" content="#1a1a1a">
         <meta name="apple-mobile-web-app-capable" content="yes">
         <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
@@ -12,6 +12,7 @@
         <link rel="stylesheet" href="css/character-fix.css">
         <link rel="stylesheet" href="css/store.css">
         <link rel="stylesheet" href="css/skills.css">
+        <link rel="stylesheet" href="css/help.css">
     </head>
     <body>
         <div id="app">
@@ -93,6 +94,123 @@
                         <button class="menu-option" id="settings">Settings</button>
                         <button class="menu-option" id="help">Help</button>
                         <button class="menu-option" id="close-menu">Return to Game</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Help Panel -->
+            <div id="help-screen" class="screen overlay">
+                <div class="help-content">
+                    <div class="help-header">
+                        <h2>Help & About</h2>
+                        <button class="help-close" id="help-close">&times;</button>
+                    </div>
+                    <div class="help-sections">
+                        <!-- About Section -->
+                        <div class="help-section">
+                            <h3>About Dun Dun Dungeon</h3>
+                            <p>A thrilling dungeon crawler adventure where you explore mysterious depths, battle fierce creatures, and collect powerful loot.</p>
+                            <div class="creator-info">
+                                <p>Created by
+                                    <a href="https://andreww.xyz" target="_blank" rel="noopener noreferrer">Andrew Wooldridge</a>
+                                </p>
+                            </div>
+                        </div>
+
+                        <!-- How to Play Section -->
+                        <div class="help-section">
+                            <h3>How to Play</h3>
+                            <div class="help-subsection">
+                                <h4>🎯 Objective</h4>
+                                <p>Explore the dungeon depths, defeat monsters, gain experience, and collect treasure to become stronger.</p>
+                            </div>
+
+                            <div class="help-subsection">
+                                <h4>🕹️ Controls</h4>
+                                <ul>
+                                    <li>
+                                        <strong>Movement:</strong>
+                                        Use the arrow buttons or WASD keys to move through the dungeon</li>
+                                    <li>
+                                        <strong>Combat:</strong>
+                                        Walk into enemies to initiate combat automatically</li>
+                                    <li>
+                                        <strong>Navigation:</strong>
+                                        Use the bottom tabs to switch between Game, Inventory, Character, and Skills</li>
+                                </ul>
+                            </div>
+
+                            <div class="help-subsection">
+                                <h4>⚔️ Combat</h4>
+                                <ul>
+                                    <li>
+                                        <strong>Attack:</strong>
+                                        Basic attack with your equipped weapon</li>
+                                    <li>
+                                        <strong>Heavy Attack:</strong>
+                                        Slower but more powerful attack</li>
+                                    <li>
+                                        <strong>Block:</strong>
+                                        Reduce incoming damage for one turn</li>
+                                    <li>
+                                        <strong>Use Item:</strong>
+                                        Consume healing potions and other usable items</li>
+                                    <li>
+                                        <strong>Escape:</strong>
+                                        Attempt to flee from combat (may fail)</li>
+                                </ul>
+                            </div>
+
+                            <div class="help-subsection">
+                                <h4>📦 Inventory & Equipment</h4>
+                                <ul>
+                                    <li>Collect weapons, armor, and accessories to improve your stats</li>
+                                    <li>Equip items by clicking on them in your inventory</li>
+                                    <li>Different equipment provides various stat bonuses</li>
+                                    <li>Use healing potions and other consumables during combat or exploration</li>
+                                </ul>
+                            </div>
+
+                            <div class="help-subsection">
+                                <h4>📊 Character Progression</h4>
+                                <ul>
+                                    <li>
+                                        <strong>Experience:</strong>
+                                        Gain XP by defeating enemies to level up</li>
+                                    <li>
+                                        <strong>Attributes:</strong>
+                                        Allocate points to Strength, Agility, and Vitality</li>
+                                    <li>
+                                        <strong>Skills:</strong>
+                                        Unlock and upgrade abilities using skill points</li>
+                                    <li>
+                                        <strong>Levels:</strong>
+                                        Each level increases your stats and grants attribute points</li>
+                                </ul>
+                            </div>
+
+                            <div class="help-subsection">
+                                <h4>💾 Saving</h4>
+                                <ul>
+                                    <li>Game automatically saves your progress</li>
+                                    <li>Use the menu to manually save or load your game</li>
+                                    <li>Progress is saved locally in your browser</li>
+                                </ul>
+                            </div>
+                        </div>
+
+                        <!-- Tips Section -->
+                        <div class="help-section">
+                            <h3>Pro Tips</h3>
+                            <ul>
+                                <li>🛡️ Always keep your equipment upgraded for better survival</li>
+                                <li>⚖️ Balance your attributes - don't neglect any stat completely</li>
+                                <li>🧪 Stock up on healing potions before venturing deeper</li>
+                                <li>🎯 Explore thoroughly to find hidden treasures and NPCs</li>
+                                <li>💪 Grind experience on easier floors before advancing</li>
+                                <li>🔄 Use the escape option wisely - sometimes retreat is the best strategy</li>
+                            </ul>
+                        </div>
                     </div>
                 </div>
             </div>

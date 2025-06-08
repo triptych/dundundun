@@ -88,10 +88,53 @@
     .action-panel {
         z-index: 50;
         border-top: 1px solid #333;
+        /* Add padding to prevent being cut off by browser UI */
+        padding-bottom: calc(0.75rem + env(safe-area-inset-bottom, 20px));
     }
 
     .bottom-nav {
         z-index: 200;
+        /* Add safe area padding to prevent being cut off by browser UI */
+        padding-bottom: calc(0.5rem + env(safe-area-inset-bottom, 20px));
+    }
+
+    /* Combat overlay adjustments for mobile */
+    .combat-ui {
+        margin-bottom: calc(env(safe-area-inset-bottom, 20px) + 20px);
+        max-height: calc(100vh - 120px - env(safe-area-inset-bottom, 20px));
+        overflow-y: auto;
+    }
+
+    .combat-actions {
+        /* Ensure combat buttons have enough space */
+        margin-bottom: calc(0.5rem + env(safe-area-inset-bottom, 10px));
+    }
+
+    /* Adjust panels to account for safe area */
+    .panel {
+        bottom: calc(70px + env(safe-area-inset-bottom, 20px));
+    }
+
+    /* Settings screen mobile adjustments */
+    .settings-content {
+        margin-bottom: calc(env(safe-area-inset-bottom, 20px) + 20px);
+        max-height: calc(100vh - 40px - env(safe-area-inset-bottom, 20px));
+        overflow-y: auto;
+    }
+
+    /* Menu screen mobile adjustments */
+    .menu-content {
+        margin-bottom: calc(env(safe-area-inset-bottom, 20px) + 20px);
+    }
+
+    /* Level up overlay mobile adjustments */
+    .level-up-content {
+        margin-bottom: calc(env(safe-area-inset-bottom, 20px) + 20px);
+    }
+
+    /* NPC dialog overlay mobile adjustments */
+    .npc-dialog-content {
+        margin-bottom: calc(env(safe-area-inset-bottom, 20px) + 20px);
     }
 }
 

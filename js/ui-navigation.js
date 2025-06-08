@@ -58,6 +58,21 @@ const UINavigation = {
         } else {
             console.warn('Close menu button not found');
         }
+
+        // Help panel close button
+        const helpCloseBtn = document.getElementById('help-close');
+        if (helpCloseBtn) {
+            helpCloseBtn.addEventListener('click', () => this.closeHelp());
+        }
+
+        // Close help panel when clicking outside
+        if (UICore.elements.helpScreen) {
+            UICore.elements.helpScreen.addEventListener('click', (e) => {
+                if (e.target === UICore.elements.helpScreen) {
+                    this.closeHelp();
+                }
+            });
+        }
     },
 
     /**
@@ -172,13 +187,23 @@ const UINavigation = {
     },
 
     /**
-     * Show help (placeholder)
+     * Show help panel
      */
     showHelp() {
-        if (typeof UINotifications !== 'undefined') {
-            UINotifications.showNotification('Help coming soon!');
-        }
         this.closeMenu();
+
+        if (UICore.elements.helpScreen) {
+            UICore.elements.helpScreen.classList.add('active');
+        }
+    },
+
+    /**
+     * Close help panel
+     */
+    closeHelp() {
+        if (UICore.elements.helpScreen) {
+            UICore.elements.helpScreen.classList.remove('active');
+        }
     },
 
     /**
